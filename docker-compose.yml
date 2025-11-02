@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: forget_ex_postgres
+    env_file: .env
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    container_name: forget_ex_bot
+    env_file: .env
+    volumes:
+      - ./bot:/app/bot
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+      - ./media:/app/media
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: forget_ex_api
+    env_file: .env
+    volumes:
+      - ./api:/app/api
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+      - ./media:/app/media
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
