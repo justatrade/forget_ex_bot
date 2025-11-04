@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Form
 from pathlib import Path
 import uuid
 
+from api.services.insult_service import InsultService
 from shared.database.models import GenderEnum
 
 router = APIRouter(prefix="/api/insults", tags=["Insults"])
@@ -30,7 +31,6 @@ async def upload_insult_with_media(
         media_path = str(save_path)
         media_type = "photo" if ext in [".jpg", ".png", ".jpeg"] else "video"
 
-    from api.services.insult_service import InsultService
     await InsultService.create_insult(gender.value, text, media_type, media_path)
 
     return {"status": "ok", "media_path": media_path}

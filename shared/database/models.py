@@ -1,15 +1,30 @@
-from sqlalchemy import Column, String, BigInteger, Boolean, DateTime, Date, ForeignKey, Text, Enum
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    MetaData,
+    String,
+    Text,
+)
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import mapped_column, relationship, Mapped
 from sqlalchemy.types import Integer
-from datetime import datetime, UTC
+
 import enum
 import re
+from datetime import date, datetime, UTC
+from typing import Optional
 
 
 @as_declarative()
 class BaseModel:
-    id: int = Column(Integer, primary_key=True, autoincrement=True)
+    __abstract__ = True
+    metadata: MetaData
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     @declared_attr
     def __tablename__(cls):
@@ -25,42 +40,61 @@ class UserStatus(enum.Enum):
 
 
 class User(BaseModel):
-    telegram_id = Column(BigInteger, unique=True, nullable=False, index=True)
-    username = Column(String, nullable=True)
-    first_name = Column(String, nullable=True)
-    last_name = Column(String, nullable=True)
-    status = Column(Enum(UserStatus), default=UserStatus.NEW)
-    payment_status = Column(Boolean, default=False)
-    created_at = Column(DateTime)
-    last_interaction = Column(DateTime, onupdate=datetime.now(UTC))
-    reminder_24h_sent = Column(Boolean, default=False)
-    reminder_72h_sent = Column(Boolean, default=False)
+    telegram_id: Mapped[int] = mapped_column(
+        BigInteger, unique=True, nullable=False, index=True
+    )
+    username: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    first_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    last_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    status: Mapped[UserStatus] = mapped_column(
+        Enum(UserStatus), default=UserStatus.NEW
+    )
+    payment_status: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime)
+    last_interaction: Mapped[Optional[datetime]] = mapped_column(
+        DateTime, onupdate=datetime.now(UTC)
+    )
+    reminder_24h_sent: Mapped[bool] = mapped_column(Boolean, default=False)
+    reminder_72h_sent: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    payments = relationship("Payment", back_populates="user")
-    insult_usage = relationship("InsultUsage", back_populates="user")
+    payments: Mapped[list["Payment"]] = relationship(back_populates="user")
+    insult_usage: Mapped[list["InsultUsage"]] = relationship(
+        back_populates="user"
+    )
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Payment(BaseModel):
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    order_id = Column(String, unique=True, nullable=False)
-    amount = Column(Integer, nullable=False)
-    promo_code = Column(String, nullable=True)
-    status = Column(String, default="pending")
-    prodamus_payment_id = Column(String, nullable=True)
-    created_at = Column(DateTime)
-    paid_at = Column(DateTime, nullable=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey('user.id'), nullable=False
+    )
+    order_id: Mapped[int] = mapped_column(String, unique=True, nullable=False)
+    amount: Mapped[int] = mapped_column(Integer, nullable=False)
+    promo_code: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    status: Mapped[str] = mapped_column(String, default="pending")
+    prodamus_payment_id: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime)
+    paid_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
-    user = relationship("User", back_populates="payments")
+    user: Mapped["User"] = relationship(back_populates="payments")
 
 
 class PromoCode(BaseModel):
-    code = Column(String, unique=True, nullable=False, index=True)
-    discount_percent = Column(Integer, nullable=True)
-    discount_fixed = Column(Integer, nullable=True)
-    final_price = Column(Integer, nullable=True)
-    is_active = Column(Boolean, default=True)
-    usage_count = Column(Integer, default=0)
-    created_at = Column(DateTime)
+    code = mapped_column(String, unique=True, nullable=False, index=True)
+    discount_percent: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True
+    )
+    discount_fixed: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True
+    )
+    final_price: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    usage_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime)
 
 
 class GenderEnum(enum.Enum):
@@ -69,16 +103,18 @@ class GenderEnum(enum.Enum):
 
 
 class Insult(BaseModel):
-    gender = Column(Enum(GenderEnum), nullable=False)
-    text = Column(Text, nullable=False)
-    media_type = Column(String, nullable=True)
-    media_path = Column(String, nullable=True)
-    created_at = Column(DateTime)
+    gender: Mapped[GenderEnum] = mapped_column(Enum(GenderEnum), nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    media_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    media_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime)
 
 
 class InsultUsage(BaseModel):
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    date = Column(Date)
-    count = Column(Integer, default=0)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("user.id"), nullable=False
+    )
+    date: Mapped[date] = mapped_column(Date)
+    count: Mapped[int] = mapped_column(Integer, default=0)
 
-    user = relationship("User", back_populates="insult_usage")
+    user: Mapped["User"] = relationship(back_populates="insult_usage")

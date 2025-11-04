@@ -36,7 +36,11 @@ class DatabaseSettings(BaseSettings):
 
     @property
     def url(self) -> str:
-        return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.db_host}:{self.db_port}/{self.postgres_db}"
+        return (
+            f"postgresql+asyncpg://{self.postgres_user}:"
+            f"{self.postgres_password}@{self.db_host}:"
+            f"{self.db_port}/{self.postgres_db}"
+        )
 
 
 class ProdamusSettings(BaseSettings):
