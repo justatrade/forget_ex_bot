@@ -1,7 +1,8 @@
 import asyncio
 from telebot.async_telebot import AsyncTeleBot
+from telebot.asyncio_storage import StateMemoryStorage
 
-from bot.handlers import start #, payment, insults, common
+from bot.handlers import start, payment#, insults, common
 # from bot.scheduler.reminders import start_scheduler
 from shared.config.logger import setup_logger
 from shared.config.settings import settings
@@ -10,7 +11,8 @@ from shared.database.connection import DatabaseConnection
 
 logger = setup_logger(__name__)
 
-bot = AsyncTeleBot(settings.telegram.bot_token)
+state_storage = StateMemoryStorage()
+bot = AsyncTeleBot(settings.telegram.bot_token, state_storage=state_storage)
 
 
 async def on_startup():
@@ -30,14 +32,12 @@ async def main():
     await on_startup()
 
     start.register_handlers(bot)
-    # payment.register_handlers(bot)
+    payment.register_handlers(bot)
     # insults.register_handlers(bot)
     # common.register_handlers(bot)
 
     try:
-        await bot.infinity_polling(timeout=5)
-    except (KeyboardInterrupt, SystemExit):
-        logger.info("Bot stopped")
+        await bot.infinity_polling(timeout=60)
     except Exception as e:
         logger.error(f"Bot polling error: {e}")
     finally:
