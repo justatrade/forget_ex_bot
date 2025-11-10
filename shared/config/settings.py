@@ -44,25 +44,25 @@ class DatabaseSettings(BaseSettings):
 
 
 class ProdamusSettings(BaseSettings):
-    prodamus_api_key: str
-    prodamus_secret: str
-    prodamus_endpoint: str
+    api_key: str
+    secret: str
+    endpoint: str
 
     class Config:
         env_prefix = ""
 
 
 class PriceSettings(BaseSettings):
-    price_basic: int
-    price_premium: int
+    basic: int
+    premium: int
 
     class Config:
         env_prefix = ""
 
 
 class PromoSettings(BaseSettings):
-    promo_code_main: str
-    promo_discount_percent: int
+    code_main: str
+    discount_percent: int
 
     class Config:
         env_prefix = ""

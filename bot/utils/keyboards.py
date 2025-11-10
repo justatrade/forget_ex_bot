@@ -21,13 +21,13 @@ def get_payment_keyboard() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
     keyboard.add(
         InlineKeyboardButton(
-            f"Базовый курс - {settings.price.price_basic}₽",
+            f"Базовый курс - {settings.price.basic}₽",
             callback_data="payment_basic"
         )
     )
     keyboard.add(
         InlineKeyboardButton(
-            f"С ништяками - {settings.price.price_premium}₽",
+            f"С ништяками - {settings.price.premium}₽",
             callback_data="payment_premium"
         )
     )
