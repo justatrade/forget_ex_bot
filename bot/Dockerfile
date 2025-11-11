@@ -1,9 +1,6 @@
-FROM python:3.12-slim
+FdockeROM python:3.12-slim
 
 RUN python -m pip install --upgrade pip
-#RUN apt-get update && apt-get install -y --no-install-recommends \
-##    gcc \
-#    python3-dev
 
 WORKDIR /app
 

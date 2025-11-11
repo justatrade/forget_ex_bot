@@ -17,8 +17,8 @@ from bot.utils.messages import (
     PROMO_CODE_APPLIED
 )
 from bot.utils.states import PaymentStates
-from bot.services.promo_code_service import PromoCodeService
-from bot.services.prodamus import ProdamusService
+# from bot.services.promo_code_service import PromoCodeService
+# from bot.services.prodamus import ProdamusService
 from shared.config.settings import settings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

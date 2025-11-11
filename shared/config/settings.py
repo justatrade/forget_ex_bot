@@ -43,45 +43,55 @@ class DatabaseSettings(BaseSettings):
         )
 
 
-class ProdamusSettings(BaseSettings):
-    api_key: str
-    secret: str
-    endpoint: str
+class RedisSettings(BaseSettings):
+    host: str = Field("redis", alias="REDIS_HOST")
+    port: int = Field(6379, alias="REDIS_PORT")
+    db: int = Field(0, alias="REDIS_DB")
 
-    class Config:
-        env_prefix = ""
+    # class Config:
+    #     env_prefix = ""
+
+
+class ProdamusSettings(BaseSettings):
+    api_key: str = Field(..., alias="PRODAMUS_API_KEY")
+    secret: str = Field(..., alias="PRODAMUS_SECRET")
+    endpoint: str = Field(..., alias="PRODAMUS_ENDPOINT")
+
+    # class Config:
+    #     env_prefix = ""
 
 
 class PriceSettings(BaseSettings):
-    basic: int
-    premium: int
+    basic: int = Field(..., alias="PRICE_BASIC")
+    premium: int = Field(..., alias="PRICE_PREMIUM")
 
-    class Config:
-        env_prefix = ""
+    # class Config:
+    #     env_prefix = ""
 
 
 class PromoSettings(BaseSettings):
-    code_main: str
-    discount_percent: int
+    code_main: str = Field(..., alias="PROMO_CODE_MAIN")
+    discount_percent: int = Field(..., alias="PROMO_DISCOUNT_PERCENT")
 
-    class Config:
-        env_prefix = ""
+    # class Config:
+    #     env_prefix = ""
 
 
 class AppSettings(BaseSettings):
-    debug: bool = False
-    webhook_url: str
-    success_url: str
-    log_level: str = "INFO"
+    debug: bool = Field(False, alias="DEBUG")
+    webhook_url: str = Field(..., alias="WEBHOOK_URL")
+    success_url: str = Field(..., alias="SUCCESS_URL")
+    log_level: str = Field("INFO", alias="LOG_LEVEL")
 
-    class Config:
-        env_prefix = ""
+    # class Config:
+    #     env_prefix = ""
 
 
 class Settings:
     telegram: TelegramSettings = TelegramSettings()
     channel: ChannelSettings = ChannelSettings()
     database: DatabaseSettings = DatabaseSettings()
+    redis: RedisSettings = RedisSettings()
     prodamus: ProdamusSettings = ProdamusSettings()
     price: PriceSettings = PriceSettings()
     promo: PromoSettings = PromoSettings()
