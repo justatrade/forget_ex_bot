@@ -31,6 +31,9 @@ class BaseModel:
         name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls.__name__)
         return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
 
 class UserStatus(enum.Enum):
     NEW = "new"
@@ -50,9 +53,9 @@ class User(BaseModel):
         Enum(UserStatus), default=UserStatus.NEW
     )
     payment_status: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     last_interaction: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, onupdate=datetime.now(UTC)
+        DateTime(timezone=True), onupdate=datetime.now()
     )
     reminder_24h_sent: Mapped[bool] = mapped_column(Boolean, default=False)
     reminder_72h_sent: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -62,13 +65,10 @@ class User(BaseModel):
         back_populates="user"
     )
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
 
 class Payment(BaseModel):
     user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey('user.id'), nullable=False
+        Integer, ForeignKey("user.id"), nullable=False
     )
     order_id: Mapped[int] = mapped_column(String, unique=True, nullable=False)
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -77,8 +77,8 @@ class Payment(BaseModel):
     prodamus_payment_id: Mapped[Optional[str]] = mapped_column(
         String, nullable=True
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime)
-    paid_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    paid_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="payments")
 
@@ -94,7 +94,7 @@ class PromoCode(BaseModel):
     final_price: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     usage_count: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class GenderEnum(enum.Enum):
@@ -107,7 +107,7 @@ class Insult(BaseModel):
     text: Mapped[str] = mapped_column(Text, nullable=False)
     media_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     media_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class InsultUsage(BaseModel):

@@ -8,7 +8,7 @@ services:
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:15432:5432"
+      - "127.0.0.1:15433:5432"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
@@ -38,10 +38,11 @@ services:
     container_name: forget_ex_bot
     env_file: .env
     volumes:
+      - ./api:/app/api
       - ./bot:/app/bot
-      - ./shared:/app/shared
       - ./logs:/app/logs
       - ./media:/app/media
+      - ./shared:/app/shared
     depends_on:
       postgres:
         condition: service_healthy
@@ -57,9 +58,10 @@ services:
     env_file: .env
     volumes:
       - ./api:/app/api
-      - ./shared:/app/shared
+      - ./bot:/app/bot
       - ./logs:/app/logs
       - ./media:/app/media
+      - ./shared:/app/shared
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:

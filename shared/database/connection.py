@@ -65,7 +65,8 @@ class DatabaseConnection:
             try:
                 yield session
                 await session.commit()
-            except Exception:
+            except Exception as e:
+                logger.exception(f"Session rollback because of exception: {e}")
                 await session.rollback()
                 raise
             finally:

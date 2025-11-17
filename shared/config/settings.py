@@ -9,16 +9,10 @@ class TelegramSettings(BaseSettings):
     bot_token: str = Field(..., alias="BOT_TOKEN")
     admin_id: int = Field(..., alias="ADMIN_ID")
 
-    # class Config:
-    #     env_prefix = ""
-
 
 class ChannelSettings(BaseSettings):
     channel_id_prod: int = Field(..., alias="CHANNEL_ID_PROD")
     channel_id_test: int = Field(..., alias="CHANNEL_ID_TEST")
-
-    # class Config:
-    #     env_prefix = ""
 
     def get_channel_id(self, debug: bool) -> int:
         return self.channel_id_test if debug else self.channel_id_prod
@@ -30,9 +24,6 @@ class DatabaseSettings(BaseSettings):
     postgres_db: str = Field(..., alias="POSTGRES_DB")
     postgres_user: str = Field(..., alias="POSTGRES_USER")
     postgres_password: str = Field(..., alias="POSTGRES_PASSWORD")
-
-    # class Config:
-    #     env_prefix = ""
 
     @property
     def url(self) -> str:
@@ -48,33 +39,24 @@ class RedisSettings(BaseSettings):
     port: int = Field(6379, alias="REDIS_PORT")
     db: int = Field(0, alias="REDIS_DB")
 
-    # class Config:
-    #     env_prefix = ""
-
 
 class ProdamusSettings(BaseSettings):
-    api_key: str = Field(..., alias="PRODAMUS_API_KEY")
+    demo_secret: str = Field(..., alias="PRODAMUS_DEMO_SECRET")
     secret: str = Field(..., alias="PRODAMUS_SECRET")
     endpoint: str = Field(..., alias="PRODAMUS_ENDPOINT")
 
-    # class Config:
-    #     env_prefix = ""
+    def get_secret(self, debug: bool) -> str:
+        return self.demo_secret if debug else self.secret
 
 
 class PriceSettings(BaseSettings):
     basic: int = Field(..., alias="PRICE_BASIC")
     premium: int = Field(..., alias="PRICE_PREMIUM")
 
-    # class Config:
-    #     env_prefix = ""
-
 
 class PromoSettings(BaseSettings):
     code_main: str = Field(..., alias="PROMO_CODE_MAIN")
     discount_percent: int = Field(..., alias="PROMO_DISCOUNT_PERCENT")
-
-    # class Config:
-    #     env_prefix = ""
 
 
 class AppSettings(BaseSettings):
@@ -82,9 +64,6 @@ class AppSettings(BaseSettings):
     webhook_url: str = Field(..., alias="WEBHOOK_URL")
     success_url: str = Field(..., alias="SUCCESS_URL")
     log_level: str = Field("INFO", alias="LOG_LEVEL")
-
-    # class Config:
-    #     env_prefix = ""
 
 
 class Settings:

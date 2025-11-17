@@ -37,12 +37,12 @@ def get_payment_keyboard() -> InlineKeyboardMarkup:
     return keyboard
 
 
-def get_promo_code_keyboard() -> InlineKeyboardMarkup:
-    keyboard = InlineKeyboardMarkup()
-    keyboard.add(
-        InlineKeyboardButton("Пропустить", callback_data="promo_skip")
-    )
-    return keyboard
+# def get_promo_code_keyboard() -> InlineKeyboardMarkup:
+#     keyboard = InlineKeyboardMarkup()
+#     keyboard.add(
+#         InlineKeyboardButton("Пропустить", callback_data="promo_skip")
+#     )
+#     return keyboard
 
 
 def get_gender_keyboard() -> InlineKeyboardMarkup:

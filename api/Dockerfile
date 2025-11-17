@@ -6,6 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY shared /app/shared
+COPY bot /apo/bot
 COPY . /app/api
 
 WORKDIR /app
