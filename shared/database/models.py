@@ -83,20 +83,6 @@ class Payment(BaseModel):
     user: Mapped["User"] = relationship(back_populates="payments")
 
 
-class PromoCode(BaseModel):
-    code = mapped_column(String, unique=True, nullable=False, index=True)
-    discount_percent: Mapped[Optional[int]] = mapped_column(
-        Integer, nullable=True
-    )
-    discount_fixed: Mapped[Optional[int]] = mapped_column(
-        Integer, nullable=True
-    )
-    final_price: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    usage_count: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-
-
 class GenderEnum(enum.Enum):
     MALE = "male"
     FEMALE = "female"

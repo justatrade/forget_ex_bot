@@ -1,6 +1,6 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from shared.config.settings import settings
+from shared.config import settings
 
 
 def get_start_keyboard() -> InlineKeyboardMarkup:

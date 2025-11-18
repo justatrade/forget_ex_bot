@@ -1,20 +1,20 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import CallbackQuery
 
-from shared.config.logger import setup_logger
-from shared.config.settings import settings
-from shared.database.connection import DatabaseConnection
-from shared.database.models import User, UserStatus
-from bot.services import ProdamusService
 from bot.utils.keyboards import (
     get_payment_keyboard,
     get_payment_url_keyboard,
     get_start_keyboard
 )
 from bot.utils.messages import PAYMENT_MESSAGE
-from bot.utils.states import PaymentStates
+from shared.config import setup_logger
+from shared.config import settings
+from shared.database.connection import DatabaseConnection
+from shared.database.models import User, UserStatus
+from shared.services import ProdamusService
 
 
 logger = setup_logger(__name__)
@@ -34,21 +34,20 @@ async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
     async with DatabaseConnection.get_session() as session:
         session: AsyncSession
         result = await session.execute(
-            select(User).filter(
+            select(User)
+            .options(selectinload(User.payments))
+            .filter(
                 User.telegram_id == call.from_user.id,
             )
         )
         user = result.scalar_one_or_none()
         if user:
             user.status = UserStatus.INTERESTED
-            await session.flush()
-            await session.commit()
+
 
 
 
 async def payment_basic_handler(call: CallbackQuery, bot: AsyncTeleBot):
-    await bot.set_state(call.from_user.id, PaymentStates.waiting_for_promo, call.message.chat.id)
-
     async with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data["package"] = "basic"
         data["price"] = settings.price.basic
@@ -59,8 +58,6 @@ async def payment_basic_handler(call: CallbackQuery, bot: AsyncTeleBot):
 
 
 async def payment_premium_handler(call: CallbackQuery, bot: AsyncTeleBot):
-    await bot.set_state(call.from_user.id, PaymentStates.waiting_for_promo, call.message.chat.id)
-
     async with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data["package"] = "premium"
         data["price"] = settings.price.premium
@@ -93,7 +90,9 @@ async def create_payment(user_id: int, bot: AsyncTeleBot):
     async with DatabaseConnection.get_session() as session:
         session: AsyncSession
         result = await session.execute(
-            select(User).filter(
+            select(User)
+            .options(selectinload(User.payments))
+            .filter(
                 User.telegram_id == user_id)
             )
         user = result.scalar_one_or_none()

@@ -2,19 +2,19 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
-from shared.config.settings import settings
+from .settings import settings
 
 
 def setup_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(getattr(logging, settings.app.log_level))
 
-    log_dir = Path('logs')
+    log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
 
     file_handler = TimedRotatingFileHandler(
         filename="logs/bot.log",
-        when='midnight',
+        when="midnight",
         interval=1,
         backupCount=0,
         encoding="utf-8"

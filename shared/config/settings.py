@@ -38,12 +38,24 @@ class RedisSettings(BaseSettings):
     host: str = Field("redis", alias="REDIS_HOST")
     port: int = Field(6379, alias="REDIS_PORT")
     db: int = Field(0, alias="REDIS_DB")
+    stream_name: str = Field("payments_stream", alias="REDIS_STREAM_NAME")
+    group_name: str = Field("bot_group", alias="REDIS_GROUP_NAME")
+    consumer_name: str = Field("bot_consumer", alias="REDIS_CONSUMER_NAME")
+    block_ms: int = Field(5000, alias="REDIS_BLOCK_MS")
+    read_count: int = Field(10, alias="REDIS_READ_COUNT")
+    claim_min_idle: int = Field(60000, alias="REDIS_CLAIM_MIN_IDLE")
+    claim_batch: int = Field(10, alias="REDIS_CLAIM_BATCH")
+    max_retries: int = Field(5, alias="REDIS_MAX_RETRIES")
+    retry_backoff_base_sec: int = Field(2, alias="REDIS_RETRY_BACKOFF_BASE_SEC")
+    dlq_stream: str = Field("payments_stream_dlq", alias="REDIS_DLQ_STREAM")
+    idempotency_ttl_days: int = Field(7, alias="REDIS_IDEMPOTENCY_TTL_DAYS")
 
 
 class ProdamusSettings(BaseSettings):
     demo_secret: str = Field(..., alias="PRODAMUS_DEMO_SECRET")
     secret: str = Field(..., alias="PRODAMUS_SECRET")
     endpoint: str = Field(..., alias="PRODAMUS_ENDPOINT")
+    var_prefix: str = Field(..., alias="PRODAMUS_VAR_PREFIX")
 
     def get_secret(self, debug: bool) -> str:
         return self.demo_secret if debug else self.secret
@@ -54,12 +66,8 @@ class PriceSettings(BaseSettings):
     premium: int = Field(..., alias="PRICE_PREMIUM")
 
 
-class PromoSettings(BaseSettings):
-    code_main: str = Field(..., alias="PROMO_CODE_MAIN")
-    discount_percent: int = Field(..., alias="PROMO_DISCOUNT_PERCENT")
-
-
 class AppSettings(BaseSettings):
+    secret_hash: str = Field(..., alias="SECRET_HASH")
     debug: bool = Field(False, alias="DEBUG")
     webhook_url: str = Field(..., alias="WEBHOOK_URL")
     success_url: str = Field(..., alias="SUCCESS_URL")
@@ -73,7 +81,6 @@ class Settings:
     redis: RedisSettings = RedisSettings()
     prodamus: ProdamusSettings = ProdamusSettings()
     price: PriceSettings = PriceSettings()
-    promo: PromoSettings = PromoSettings()
     app: AppSettings = AppSettings()
 
 

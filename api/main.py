@@ -1,10 +1,10 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import webhook, insults
-from api.utils import lifespan
-from shared.config.logger import setup_logger
-from shared.config.settings import settings
+from api.utils import has_access, lifespan
+from shared.config import setup_logger
+from shared.config import settings
 
 logger = setup_logger(__name__)
 
@@ -12,7 +12,8 @@ app = FastAPI(
     lifespan=lifespan,
     title="Forget Ex Bot API",
     version="1.0.0",
-    debug=settings.app.debug
+    docs_url="/swagger",
+    debug=settings.app.debug,
 )
 
 origins=[
@@ -29,7 +30,7 @@ app.add_middleware(
 
 
 app.include_router(webhook.router)
-app.include_router(insults.router)
+app.include_router(insults.router, dependencies=[Depends(has_access)])
 
 
 @app.get("/")
@@ -40,3 +41,14 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
+
+if settings.app.debug:
+    import pydevd_pycharm
+
+    pydevd_pycharm.settrace(
+        host="host.docker.internal",
+        port=5678,
+        stdoutToServer=True,
+        stderrToServer=True,
+        suspend=False,
+    )

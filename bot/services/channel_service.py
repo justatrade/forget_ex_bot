@@ -1,8 +1,11 @@
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import ChatInviteLink
-from shared.config.settings import settings
-from shared.config.logger import setup_logger
-from bot.utils.messages import PAYMENT_SUCCESS_MESSAGE
+from shared.config import settings
+from shared.config import setup_logger
+from bot.utils.messages import (
+    CHANNEL_INVITE_LINK_MESSAGE,
+    PAYMENT_SUCCESS_MESSAGE,
+)
 
 logger = setup_logger(__name__)
 
@@ -35,13 +38,16 @@ class ChannelService:
 
             await cls._bot.send_message(
                 telegram_id,
-                PAYMENT_SUCCESS_MESSAGE.format(channel_link="Вы добавлены в канал!")
+                PAYMENT_SUCCESS_MESSAGE.format(channel_link="")
             )
 
             return "direct_add"
 
         except Exception as e:
-            logger.warning(f"Could not add user {telegram_id} directly: {e}. Creating invite link...")
+            logger.warning(
+                f"Could not add user {telegram_id} directly: {e}. "
+                "Creating invite link..."
+            )
 
             try:
                 invite_link: ChatInviteLink = await cls._bot.create_chat_invite_link(
@@ -54,7 +60,11 @@ class ChannelService:
 
                 await cls._bot.send_message(
                     telegram_id,
-                    PAYMENT_SUCCESS_MESSAGE.format(channel_link=invite_link.invite_link)
+                    PAYMENT_SUCCESS_MESSAGE.format(
+                        channel_link=CHANNEL_INVITE_LINK_MESSAGE.format(
+                            channel_link=invite_link.invite_link
+                        )
+                    )
                 )
 
                 return invite_link.invite_link

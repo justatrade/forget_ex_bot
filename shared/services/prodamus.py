@@ -6,8 +6,8 @@ from collections.abc import MutableMapping
 from datetime import datetime
 from urllib.parse import urlencode
 
-from shared.config.settings import settings
-from shared.config.logger import setup_logger
+from shared.config import settings
+from shared.config import setup_logger
 from shared.database.connection import DatabaseConnection
 from shared.database.models import Payment, User
 from sqlalchemy import select
@@ -100,7 +100,7 @@ class ProdamusService:
             )
             session.add(payment)
 
-        base_url = "https://payform.ru"
+        base_url = settings.prodamus.endpoint
 
         data = {
             "order_id": order_id,
@@ -114,7 +114,7 @@ class ProdamusService:
             ],
             "do": "link",
             "sys": "maranaddasha",
-            "urlReturn": settings.app.success_url,
+            "urlSuccess": settings.app.success_url,
             "urlNotification": settings.app.webhook_url,
         }
 
@@ -130,22 +130,25 @@ class ProdamusService:
         data["signature"] = signature
 
         query_params = ProdamusService._http_build_query(data)
-        short_url = f"{base_url}/?{urlencode(query_params)}"
-        if settings.app.debug:
-            payment_url = await ProdamusService._get_final_payment_url(
-                short_url
-            )
-        else:
-            payment_url = short_url
+        long_url = f"{base_url}/?{urlencode(query_params)}"
+        logger.debug(f"Full link {long_url}")
+        payment_url = await ProdamusService._get_final_payment_url(
+            long_url
+        )
 
-        logger.info(f"Payment link created for user {user_id}: {order_id}")
+        logger.info(
+            f"Payment link created for user {user_id}: {order_id}. "
+            f"Link: {payment_url}"
+        )
         return payment_url
 
     @staticmethod
-    async def verify_webhook_signature(data: dict, received_signature: str) -> bool:
+    async def verify_webhook_signature(data: dict) -> bool:
         """Проверяет подпись webhook от Prodamus"""
         data_copy = data.copy()
-        data_copy.pop("signature", None)
+        received_signature = data_copy.pop(
+            settings.prodamus.var_prefix + "sign", None
+        )
 
         calculated_signature = ProdamusService._sign(
             data_copy,
@@ -154,7 +157,7 @@ class ProdamusService:
         is_valid = calculated_signature == received_signature
 
         if not is_valid:
-            logger.warning(f"Invalid webhook signature")
+            logger.warning(f"Invalid webhook signature for: {data}")
 
         return is_valid
 

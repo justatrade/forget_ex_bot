@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from shared.config.logger import setup_logger
+from shared.config import setup_logger
 from shared.database.connection import DatabaseConnection
 
 

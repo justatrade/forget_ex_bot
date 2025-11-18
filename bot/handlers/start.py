@@ -3,7 +3,7 @@ from typing import cast
 
 from bot.utils.keyboards import get_start_keyboard
 from bot.utils.messages import START_MESSAGE
-from shared.config.logger import setup_logger
+from shared.config import setup_logger
 from shared.database.connection import DatabaseConnection
 from shared.database.models import User, UserStatus
 

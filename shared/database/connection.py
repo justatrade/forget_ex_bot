@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from shared.config.settings import settings
-from shared.config.logger import setup_logger
+from shared.config import settings
+from shared.config import setup_logger
 
 
 logger = setup_logger(__name__)
