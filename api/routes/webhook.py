@@ -105,7 +105,7 @@ async def prodamus_webhook(
 
                     event = PaymentEvent(
                         payment_id=payment.id,
-                        user_id=user.id,
+                        user_id=user.telegram_id,
                         status=payment_status,
                         paid_at=datetime.now(),
                     )

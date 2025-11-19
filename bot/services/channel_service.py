@@ -50,13 +50,18 @@ class ChannelService:
             )
 
             try:
-                invite_link: ChatInviteLink = await cls._bot.create_chat_invite_link(
-                    chat_id=channel_id,
-                    member_limit=1,
-                    name=f"User_{telegram_id}"
+                invite_link: ChatInviteLink = (
+                    await cls._bot.create_chat_invite_link(
+                        chat_id=channel_id,
+                        member_limit=1,
+                        name=f"User_{telegram_id}"
+                    )
                 )
 
-                logger.info(f"Invite link created for user {telegram_id}: {invite_link.invite_link}")
+                logger.info(
+                    "Invite link created for user "
+                    f"{telegram_id}: {invite_link.invite_link}"
+                )
 
                 await cls._bot.send_message(
                     telegram_id,
@@ -70,7 +75,10 @@ class ChannelService:
                 return invite_link.invite_link
 
             except Exception as invite_error:
-                logger.error(f"Failed to create invite link for user {telegram_id}: {invite_error}")
+                logger.error(
+                    "Failed to create invite link for "
+                    f"user {telegram_id}: {invite_error}"
+                )
                 raise
 
     @classmethod
