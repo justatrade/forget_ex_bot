@@ -52,15 +52,16 @@ async def start_handler(message: Message, bot: AsyncTeleBot):
     ).replace(
         "Мара Charmer", f"<a href='{MARA_CHANNEL}'>Мара Charmer</a>"
     )
-    start_photo = Path.exists(Path("./data/photo/start_photo.jpg"))
-    if start_photo:
-        await bot.send_photo(
-            message.chat.id,
-            photo="./data/photo/start_photo.jpg",
-            caption=message_text,
-            parse_mode="HTML",
-            reply_markup=get_start_keyboard_1(),
-        )
+    file_path = Path("./data/photo/start_photo.jpg")
+    if file_path.exists():
+        with open(file_path, "rb") as photo_file:
+            await bot.send_photo(
+                message.chat.id,
+                photo=photo_file,
+                caption=message_text,
+                parse_mode="HTML",
+                reply_markup=get_start_keyboard_1(),
+            )
     else:
         await bot.send_message(
             message.chat.id,
