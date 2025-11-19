@@ -16,10 +16,6 @@ app = FastAPI(
     debug=settings.app.debug,
 )
 
-origins=[
-    "http://127.0.0.1:80",
-]
-
 app.add_middleware(
     CORSMiddleware, # type: ignore[arg-type]
     allow_origins=["*"],

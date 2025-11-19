@@ -1,17 +1,19 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from bot.services import ChannelService
+from api.utils.dependencies import get_publisher
 from shared.config import setup_logger
 from shared.config import settings
 from shared.database.connection import DatabaseConnection
 from shared.database.models import Payment, User, UserStatus
-from shared.services import ProdamusService
+from shared.schemas import PaymentEvent
+from shared.services import ProdamusService, RedisStreamPublisher
+
 
 logger = setup_logger(__name__)
 
@@ -20,7 +22,10 @@ router = APIRouter(prefix="/webhook", tags=["Webhook"])
 
 @router.api_route("/", methods=["GET", "POST"])
 @router.api_route("/success", methods=["GET", "POST"])
-async def prodamus_webhook(request: Request):
+async def prodamus_webhook(
+    request: Request,
+    publisher: RedisStreamPublisher = Depends(get_publisher)
+):
     """Обработка webhook от Prodamus после оплаты"""
 
     reply = {}
@@ -98,14 +103,15 @@ async def prodamus_webhook(request: Request):
                     user.payment_status = True
                     user.status = UserStatus.PAID
 
-                    try:
-                        await ChannelService.grant_access(user.telegram_id)
-                        logger.info(f"Access granted to user {user.telegram_id}")
-                    except Exception as e:
-                        logger.error(
-                            "Failed to grant access to user "
-                            f"{user.telegram_id}: {e}"
-                        )
+                    event = PaymentEvent(
+                        payment_id=payment.id,
+                        user_id=user.id,
+                        status=payment_status,
+                        paid_at=datetime.now(),
+                    )
+
+                    msg_id = await publisher.publish(event)
+                    logger.info(f"PaymentEvent sent to Redis Stream: {msg_id}")
 
         logger.info(f"Payment processed successfully: {order_id}")
         if not reply:
@@ -114,6 +120,7 @@ async def prodamus_webhook(request: Request):
     except HTTPException:
         raise
     except Exception as e:
+        await publisher.publish(event, settings.redis.dlq_stream)
         logger.error(f"Webhook processing error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
     else:

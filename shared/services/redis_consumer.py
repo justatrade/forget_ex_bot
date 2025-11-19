@@ -65,10 +65,8 @@ class RedisStreamConsumer:
         """
         Минимальная обработка сообщения: разобрать JSON в поле 'data' (если есть),
         залогировать и ACK'нуть сообщение.
-        На этом этапе не делаем DB/ChannelService — это следующий этап.
         """
         try:
-            # Обычно мы пишем в поток как: XADD stream * data <json>
             if "data" in fields:
                 raw = fields["data"]
             else:
@@ -101,8 +99,8 @@ class RedisStreamConsumer:
 
             logger.info(f"Received message id={msg_id} payload={payload}")
 
-            from bot.schemas.payment_event import PaymentEvent
-            from bot.services.payment_handler import PaymentHandler
+            from shared.schemas import PaymentEvent
+            from bot.services import PaymentHandler
             try:
                 event = PaymentEvent.model_validate(payload)
             except Exception as val_exc:

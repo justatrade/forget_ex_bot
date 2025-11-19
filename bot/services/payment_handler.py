@@ -1,6 +1,6 @@
 from shared.config import setup_logger
 from bot.services.channel_service import ChannelService
-from bot.schemas.payment_event import PaymentEvent
+from shared.schemas import PaymentEvent
 
 logger = setup_logger(__name__)
 

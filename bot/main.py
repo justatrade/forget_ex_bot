@@ -6,11 +6,12 @@ from telebot.async_telebot import AsyncTeleBot
 from telebot.asyncio_storage import StateRedisStorage
 
 from bot.handlers import start, payment#, insults, common
-from bot.services import ChannelService, RedisStreamConsumer
+from bot.services import ChannelService
 # from bot.scheduler.reminders import start_scheduler
 from shared.config import setup_logger
 from shared.config import settings
 from shared.database.connection import DatabaseConnection
+from shared.services import RedisStreamConsumer
 
 
 logger = setup_logger(__name__)
@@ -62,7 +63,6 @@ async def on_startup():
 
 async def on_shutdown():
     logger.info("Bot shutting down...")
-    global redis_consumer
     if redis_consumer is not None:
         try:
             await redis_consumer.stop()
