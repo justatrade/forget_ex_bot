@@ -56,7 +56,7 @@ async def start_handler(message: Message, bot: AsyncTeleBot):
     if start_photo:
         await bot.send_photo(
             message.chat.id,
-            photo="URL_или_file_id_фотографии",
+            photo="./data/photo/start_photo.jpg",
             caption=message_text,
             parse_mode="HTML",
             reply_markup=get_start_keyboard_1(),
@@ -74,10 +74,9 @@ async def start_handler(message: Message, bot: AsyncTeleBot):
 
 async def start_next_handler(call: CallbackQuery, bot: AsyncTeleBot):
     """Обработчик кнопки 'А что будет?'"""
-    await bot.edit_message_text(
-        START_MESSAGE_2,
+    await bot.send_message(
         call.message.chat.id,
-        call.message.message_id,
+        START_MESSAGE_2,
         reply_markup=get_start_keyboard_2()
     )
 
