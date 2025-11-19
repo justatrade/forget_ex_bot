@@ -38,13 +38,13 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
-if settings.app.debug:
-    import pydevd_pycharm
-
-    pydevd_pycharm.settrace(
-        host="host.docker.internal",
-        port=5678,
-        stdoutToServer=True,
-        stderrToServer=True,
-        suspend=False,
-    )
+# if settings.app.debug:
+#     import pydevd_pycharm
+#
+#     pydevd_pycharm.settrace(
+#         host="host.docker.internal",
+#         port=5678,
+#         stdoutToServer=True,
+#         stderrToServer=True,
+#         suspend=False,
+#     )

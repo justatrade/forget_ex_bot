@@ -141,11 +141,12 @@ class RedisStreamConsumer:
         except Exception as e:
             logger.exception(f"Error handling message id={msg_id}: {e}")
 
-
     async def start_listening(self) -> None:
         """
         Основной loop: блокирующе читаем новые сообщения в consumer group и обрабатываем их.
         """
+        await self.ensure_group()
+
         logger.info(
             f"Starting RedisStreamConsumer: stream={self.stream} "
             f"group={self.group} consumer={self.consumer}"

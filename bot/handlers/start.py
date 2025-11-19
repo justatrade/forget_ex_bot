@@ -1,8 +1,14 @@
+from pathlib import Path
 from datetime import datetime
-from typing import cast
 
-from bot.utils.keyboards import get_start_keyboard
-from bot.utils.messages import START_MESSAGE
+from bot.utils.keyboards import get_start_keyboard_1, get_start_keyboard_2
+from bot.utils.messages import (
+    DARIA_CHANNEL,
+    MARA_CHANNEL,
+    START_MESSAGE_1,
+    START_MESSAGE_2
+)
+from bot.utils.states import StartStates
 from shared.config import setup_logger
 from shared.database.connection import DatabaseConnection
 from shared.database.models import User, UserStatus
@@ -10,7 +16,7 @@ from shared.database.models import User, UserStatus
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from telebot.async_telebot import AsyncTeleBot
-from telebot.types import Message
+from telebot.types import CallbackQuery, Message
 
 logger = setup_logger(__name__)
 
@@ -23,8 +29,8 @@ async def start_handler(message: Message, bot: AsyncTeleBot):
         session: AsyncSession
 
         result = await session.execute(
-            select(User).where(
-                cast("ColumnElement[bool]", User.telegram_id == user.id)
+            select(User).filter(
+                User.telegram_id == user.id
             )
         )
         db_user = result.scalar_one_or_none()
@@ -39,19 +45,54 @@ async def start_handler(message: Message, bot: AsyncTeleBot):
                 created_at=datetime.now(),
             )
             session.add(db_user)
-            await session.commit()
             logger.info(f"New user {user.id} created in database")
 
-    await bot.send_message(
-        message.chat.id,
-        START_MESSAGE,
-        reply_markup=get_start_keyboard()
+    message_text = START_MESSAGE_1.replace(
+        "Дарья Фурман", f"<a href='{DARIA_CHANNEL}'>Дарья Фурман</a>"
+    ).replace(
+        "Мара Charmer", f"<a href='{MARA_CHANNEL}'>Мара Charmer</a>"
     )
+    start_photo = Path.exists(Path("./data/photo/start_photo.jpg"))
+    if start_photo:
+        await bot.send_photo(
+            message.chat.id,
+            photo="URL_или_file_id_фотографии",
+            caption=message_text,
+            parse_mode="HTML",
+            reply_markup=get_start_keyboard_1(),
+        )
+    else:
+        await bot.send_message(
+            message.chat.id,
+            message_text,
+            parse_mode="HTML",
+            reply_markup=get_start_keyboard_1(),
+            disable_web_page_preview=True,
+        )
+
+    await bot.set_state(user.id, StartStates.waiting_for_next, message.chat.id)
+
+async def start_next_handler(call: CallbackQuery, bot: AsyncTeleBot):
+    """Обработчик кнопки 'А что будет?'"""
+    await bot.edit_message_text(
+        START_MESSAGE_2,
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=get_start_keyboard_2()
+    )
+
+    await bot.delete_state(call.from_user.id, call.message.chat.id)
 
 
 def register_handlers(bot: AsyncTeleBot):
     bot.register_message_handler(
         lambda msg: start_handler(msg, bot),
         commands=['start'],
+        pass_bot=True
+    )
+
+    bot.register_callback_query_handler(
+        lambda call: start_next_handler(call, bot),
+        func=lambda call: call.data == "start_next",
         pass_bot=True
     )

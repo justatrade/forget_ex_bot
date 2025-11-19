@@ -7,7 +7,7 @@ from telebot.types import CallbackQuery
 from bot.utils.keyboards import (
     get_payment_keyboard,
     get_payment_url_keyboard,
-    get_start_keyboard
+    get_start_keyboard_1
 )
 from bot.utils.messages import PAYMENT_MESSAGE
 from shared.config import setup_logger
@@ -43,8 +43,6 @@ async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
         user = result.scalar_one_or_none()
         if user:
             user.status = UserStatus.INTERESTED
-
-
 
 
 async def payment_basic_handler(call: CallbackQuery, bot: AsyncTeleBot):
@@ -117,7 +115,7 @@ async def back_to_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
         START_MESSAGE,
         call.message.chat.id,
         call.message.message_id,
-        reply_markup=get_start_keyboard()
+        reply_markup=get_start_keyboard_1()
     )
 
 
