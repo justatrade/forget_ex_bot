@@ -21,13 +21,12 @@ logger = setup_logger(__name__)
 
 
 async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
-    await bot.edit_message_text(
+    await bot.send_message(
+        call.message.chat.id,
         PAYMENT_MESSAGE.format(
             price_basic=settings.price.basic,
             price_premium=settings.price.premium
         ),
-        call.message.chat.id,
-        call.message.message_id,
         reply_markup=get_payment_keyboard()
     )
 
@@ -111,10 +110,9 @@ async def create_payment(user_id: int, bot: AsyncTeleBot):
 
 async def back_to_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
     from bot.utils.messages import START_MESSAGE
-    await bot.edit_message_text(
-        START_MESSAGE,
+    await bot.send_message(
         call.message.chat.id,
-        call.message.message_id,
+        START_MESSAGE,
         reply_markup=get_start_keyboard_1()
     )
 
