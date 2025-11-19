@@ -33,53 +33,36 @@ class ChannelService:
         channel_id = settings.channel.get_channel_id(settings.app.debug)
 
         try:
-            await cls._bot.unban_chat_member(channel_id, telegram_id)
-            logger.info(f"User {telegram_id} added to channel directly")
+            invite_link: ChatInviteLink = (
+                await cls._bot.create_chat_invite_link(
+                    chat_id=channel_id,
+                    member_limit=1,
+                    name=f"User_{telegram_id}"
+                )
+            )
+
+            logger.info(
+                "Invite link created for user "
+                f"{telegram_id}: {invite_link.invite_link}"
+            )
 
             await cls._bot.send_message(
                 telegram_id,
-                PAYMENT_SUCCESS_MESSAGE.format(channel_link="")
-            )
-
-            return "direct_add"
-
-        except Exception as e:
-            logger.warning(
-                f"Could not add user {telegram_id} directly: {e}. "
-                "Creating invite link..."
-            )
-
-            try:
-                invite_link: ChatInviteLink = (
-                    await cls._bot.create_chat_invite_link(
-                        chat_id=channel_id,
-                        member_limit=1,
-                        name=f"User_{telegram_id}"
+                PAYMENT_SUCCESS_MESSAGE.format(
+                    channel_link=CHANNEL_INVITE_LINK_MESSAGE.format(
+                        channel_link=invite_link.invite_link
                     )
                 )
+            )
 
-                logger.info(
-                    "Invite link created for user "
-                    f"{telegram_id}: {invite_link.invite_link}"
-                )
+            return invite_link.invite_link
 
-                await cls._bot.send_message(
-                    telegram_id,
-                    PAYMENT_SUCCESS_MESSAGE.format(
-                        channel_link=CHANNEL_INVITE_LINK_MESSAGE.format(
-                            channel_link=invite_link.invite_link
-                        )
-                    )
-                )
-
-                return invite_link.invite_link
-
-            except Exception as invite_error:
-                logger.error(
-                    "Failed to create invite link for "
-                    f"user {telegram_id}: {invite_error}"
-                )
-                raise
+        except Exception as invite_error:
+            logger.error(
+                "Failed to create invite link for "
+                f"user {telegram_id}: {invite_error}"
+            )
+            raise
 
     @classmethod
     async def revoke_access(cls, telegram_id: int):
