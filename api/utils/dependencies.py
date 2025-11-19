@@ -8,9 +8,7 @@ logger = setup_logger(__name__)
 
 async def get_publisher():
     redis_client = RedisManager.get_client()
-    return RedisStreamPublisher(
-        client=redis_client, stream=settings.redis.stream_name
-    )
+    return RedisStreamPublisher(client=redis_client)
 
 
 class RedisManager:
