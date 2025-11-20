@@ -42,10 +42,16 @@ async def prodamus_webhook(
 
         logger.info(
             "Received webhook from Prodamus: "
-            f"{data_dict.get(settings.prodamus.var_prefix+'order_id')}"
+            f"{data_dict.get(
+                settings.prodamus.var_prefix+'order_id',
+                data_dict.get('order_num'),
+            )}"
         )
 
-        received_signature = data_dict.get(settings.prodamus.var_prefix + "sign")
+        received_signature = data_dict.get(
+            settings.prodamus.var_prefix + "sign",
+            data_dict.get("sign"),
+        )
         if not received_signature:
             logger.error(f"No signature in webhook. Data: {data_dict}")
             raise HTTPException(status_code=400, detail="No signature")
@@ -55,9 +61,13 @@ async def prodamus_webhook(
             logger.error(f"Invalid webhook signature. Data: {data_dict}")
             raise HTTPException(status_code=403, detail="Invalid signature")
 
-        order_id = data_dict.get(settings.prodamus.var_prefix + "order_id")
+        order_id = data_dict.get(
+            settings.prodamus.var_prefix + "order_id",
+            data_dict.get("order_num"),
+        )
         payment_status = data_dict.get(
-            settings.prodamus.var_prefix + "status"
+            settings.prodamus.var_prefix + "status",
+            data_dict.get("status"),
         )
 
         if payment_status != "success":
@@ -93,7 +103,8 @@ async def prodamus_webhook(
             else:
                 payment.status = payment_status
                 payment.prodamus_payment_id = data_dict.get(
-                    settings.prodamus.var_prefix + "id"
+                    settings.prodamus.var_prefix + "id",
+                    data_dict.get("order_id"),
                 )
 
             if payment_status == "success":

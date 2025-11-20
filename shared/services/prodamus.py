@@ -147,7 +147,8 @@ class ProdamusService:
         """Проверяет подпись webhook от Prodamus"""
         data_copy = data.copy()
         received_signature = data_copy.pop(
-            settings.prodamus.var_prefix + "sign", None
+            settings.prodamus.var_prefix + "sign",
+            data_copy.pop("sign", None),
         )
 
         calculated_signature = ProdamusService._sign(
