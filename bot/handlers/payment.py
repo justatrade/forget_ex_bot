@@ -20,6 +20,33 @@ from shared.services import ProdamusService
 logger = setup_logger(__name__)
 
 
+async def check_user_paid(telegram_id: int, bot: AsyncTeleBot) -> bool:
+    async with DatabaseConnection.get_session() as session:
+        session: AsyncSession
+        result = await session.execute(
+            select(User)
+            .options(selectinload(User.payments))
+            .filter(
+                User.telegram_id == telegram_id,
+            )
+        )
+        user = result.scalar_one_or_none()
+        if user and user.status == UserStatus.PAID:
+            await bot.send_message(
+                telegram_id,
+                PAID_ALREADY_MESSAGE.format(
+                    link=(
+                        user.invite_link
+                        if user.invite_link
+                        else "Ну, потерялась, ничего не поделать!"
+                    )
+                ),
+            )
+            return True
+        else:
+            return False
+
+
 async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
     async with DatabaseConnection.get_session() as session:
         session: AsyncSession
@@ -32,17 +59,7 @@ async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
         )
         user = result.scalar_one_or_none()
         if user:
-            if user.status == UserStatus.PAID:
-                await bot.send_message(
-                    call.message.chat.id,
-                    PAID_ALREADY_MESSAGE.format(
-                        link = (
-                            user.invite_link
-                            if user.invite_link
-                            else "Ну, потерялась, ничего не поделать!"
-                        )
-                    ),
-                )
+            if await check_user_paid(call.from_user.id, bot):
                 await bot.delete_state(call.from_user.id, call.message.chat.id)
             else:
                 await bot.send_message(
@@ -64,8 +81,10 @@ async def payment_basic_handler(call: CallbackQuery, bot: AsyncTeleBot):
         data["price"] = settings.price.basic
 
     user_id = call.from_user.id
-
-    await create_payment(user_id, bot)
+    if not await check_user_paid(user_id, bot):
+        await create_payment(user_id, bot)
+    else:
+        await bot.delete_state(user_id)
     await bot.answer_callback_query(call.id)
 
 
@@ -76,11 +95,17 @@ async def payment_premium_handler(call: CallbackQuery, bot: AsyncTeleBot):
 
     user_id = call.from_user.id
 
-    await create_payment(user_id, bot)
+    if not await check_user_paid(user_id, bot):
+        await create_payment(user_id, bot)
+    else:
+        await bot.delete_state(user_id)
     await bot.answer_callback_query(call.id)
 
 
 async def create_payment(user_id: int, bot: AsyncTeleBot):
+    if await check_user_paid(user_id, bot):
+        return
+
     async with (bot.retrieve_data(user_id) as data):
         price = data.get("price")
         if not price:
