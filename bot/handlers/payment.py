@@ -33,7 +33,7 @@ async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
         )
         user = result.scalar_one_or_none()
         if user:
-            if user.payment_status == UserStatus.PAID:
+            if user.status == UserStatus.PAID:
                 await bot.send_message(
                     call.message.chat.id,
                     PAID_ALREADY_MESSAGE.format(
