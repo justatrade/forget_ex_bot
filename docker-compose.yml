@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - "15433:5432"
     restart: unless-stopped
@@ -23,6 +25,8 @@ services:
     command: redis-server --appendonly yes --appendfsync everysec
     volumes:
       - ./redis_data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - "6379:6379"
     restart: unless-stopped
@@ -45,6 +49,8 @@ services:
       - ./media:/app/media
       - ./shared:/app/shared
       - ./data:/app/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,6 +70,8 @@ services:
       - ./logs:/app/logs
       - ./media:/app/media
       - ./shared:/app/shared
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - "8000:8000"
     depends_on:
@@ -84,5 +92,7 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/certs:/etc/ssl/certs
       - ./nginx/logs:/var/log/nginx
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - api
