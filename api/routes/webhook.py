@@ -47,12 +47,12 @@ async def prodamus_webhook(
 
         received_signature = data_dict.get(settings.prodamus.var_prefix + "sign")
         if not received_signature:
-            logger.error("No signature in webhook")
+            logger.error(f"No signature in webhook. Data: {data_dict}")
             raise HTTPException(status_code=400, detail="No signature")
 
         is_valid = await ProdamusService.verify_webhook_signature(data_dict)
         if not is_valid:
-            logger.error("Invalid webhook signature")
+            logger.error(f"Invalid webhook signature. Data: {data_dict}")
             raise HTTPException(status_code=403, detail="Invalid signature")
 
         order_id = data_dict.get(settings.prodamus.var_prefix + "order_id")
@@ -62,7 +62,8 @@ async def prodamus_webhook(
 
         if payment_status != "success":
             logger.warning(
-                f"Payment not successful: {order_id}, status: {payment_status}"
+                f"Payment not successful: {order_id}, status: {payment_status}."
+                f"Data: {data_dict}"
             )
             reply = {"status": "ok", "message": "Payment not successful"}
             return JSONResponse(content=reply, status_code=200)
@@ -78,11 +79,15 @@ async def prodamus_webhook(
             payment = result.scalar_one_or_none()
 
             if not payment:
-                logger.error(f"Payment not found: {order_id}")
+                logger.error(
+                    f"Payment not found: {order_id}. Data: {data_dict}"
+                )
                 raise HTTPException(status_code=404, detail="Payment not found")
 
             if payment.status == "success":
-                logger.info(f"Payment already processed: {order_id}")
+                logger.info(
+                    f"Payment already processed: {order_id}. Data: {data_dict}"
+                )
                 reply = {"status": "ok", "message": "Already processed"}
                 return JSONResponse(content=reply, status_code=200)
             else:

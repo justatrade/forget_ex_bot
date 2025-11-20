@@ -10,7 +10,7 @@ from bot.utils.keyboards import (
     get_payment_url_keyboard,
     get_start_keyboard_1
 )
-from bot.utils.messages import PAYMENT_MESSAGE
+from bot.utils.messages import PAID_ALREADY_MESSAGE, PAYMENT_MESSAGE
 from shared.config import setup_logger
 from shared.config import settings
 from shared.database.connection import DatabaseConnection
@@ -22,15 +22,6 @@ logger = setup_logger(__name__)
 
 
 async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
-    await bot.send_message(
-        call.message.chat.id,
-        PAYMENT_MESSAGE.format(
-            price_basic=settings.price.basic,
-            price_premium=settings.price.premium
-        ),
-        reply_markup=get_payment_keyboard()
-    )
-
     async with DatabaseConnection.get_session() as session:
         session: AsyncSession
         result = await session.execute(
@@ -42,6 +33,21 @@ async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
         )
         user = result.scalar_one_or_none()
         if user:
+            if user.payment_status:
+                await bot.send_message(
+                    call.message.chat.id,
+                    PAID_ALREADY_MESSAGE.format,
+                )
+                await bot.delete_state(call.from_user.id, call.message.chat.id)
+            else:
+                await bot.send_message(
+                    call.message.chat.id,
+                    PAYMENT_MESSAGE.format(
+                        price_basic=settings.price.basic,
+                        price_premium=settings.price.premium
+                    ),
+                    reply_markup=get_payment_keyboard()
+                )
             user.status = UserStatus.INTERESTED
 
     await bot.answer_callback_query(call.id)
