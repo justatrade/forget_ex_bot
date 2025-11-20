@@ -21,7 +21,7 @@ from telebot.types import CallbackQuery, Message
 logger = setup_logger(__name__)
 
 
-async def start_handler(message: Message, bot: AsyncTeleBot):
+async def start_handler(message: Message | CallbackQuery, bot: AsyncTeleBot):
     user = message.from_user
     logger.info(f"User {user.id} started bot")
 
@@ -82,6 +82,7 @@ async def start_next_handler(call: CallbackQuery, bot: AsyncTeleBot):
     )
 
     await bot.delete_state(call.from_user.id, call.message.chat.id)
+    await bot.answer_callback_query(call.id)
 
 
 def register_handlers(bot: AsyncTeleBot):

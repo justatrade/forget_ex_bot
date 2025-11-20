@@ -4,6 +4,7 @@ from sqlalchemy.orm import selectinload
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import CallbackQuery
 
+from bot.handlers.start import start_handler
 from bot.utils.keyboards import (
     get_payment_keyboard,
     get_payment_url_keyboard,
@@ -43,6 +44,8 @@ async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
         if user:
             user.status = UserStatus.INTERESTED
 
+    await bot.answer_callback_query(call.id)
+
 
 async def payment_basic_handler(call: CallbackQuery, bot: AsyncTeleBot):
     async with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
@@ -52,6 +55,7 @@ async def payment_basic_handler(call: CallbackQuery, bot: AsyncTeleBot):
     user_id = call.from_user.id
 
     await create_payment(user_id, bot)
+    await bot.answer_callback_query(call.id)
 
 
 async def payment_premium_handler(call: CallbackQuery, bot: AsyncTeleBot):
@@ -62,6 +66,7 @@ async def payment_premium_handler(call: CallbackQuery, bot: AsyncTeleBot):
     user_id = call.from_user.id
 
     await create_payment(user_id, bot)
+    await bot.answer_callback_query(call.id)
 
 
 async def create_payment(user_id: int, bot: AsyncTeleBot):
@@ -109,12 +114,8 @@ async def create_payment(user_id: int, bot: AsyncTeleBot):
 
 
 async def back_to_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
-    from bot.utils.messages import START_MESSAGE
-    await bot.send_message(
-        call.message.chat.id,
-        START_MESSAGE,
-        reply_markup=get_start_keyboard_1()
-    )
+    await start_handler(call.message, bot)
+    await bot.answer_callback_query(call.id)
 
 
 def register_handlers(bot: AsyncTeleBot):
