@@ -54,6 +54,7 @@ async def prodamus_webhook(
         )
         if not received_signature:
             received_signature = request.headers.get("Sign")
+            data_dict.update({"sign": received_signature})
         if not received_signature:
             logger.error(
                 "No signature in webhook. "
