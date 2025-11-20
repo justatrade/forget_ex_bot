@@ -20,8 +20,8 @@ logger = setup_logger(__name__)
 router = APIRouter(prefix="/webhook", tags=["Webhook"])
 
 
-@router.api_route("/", methods=["GET", "POST"])
 @router.api_route("/success", methods=["GET", "POST"])
+@router.api_route("", methods=["GET", "POST"])
 async def prodamus_webhook(
     request: Request,
     publisher: RedisStreamPublisher = Depends(get_publisher)
@@ -65,6 +65,7 @@ async def prodamus_webhook(
                 f"Payment not successful: {order_id}, status: {payment_status}"
             )
             reply = {"status": "ok", "message": "Payment not successful"}
+            return JSONResponse(content=reply, status_code=200)
 
         async with DatabaseConnection.get_session() as session:
             session: AsyncSession
@@ -83,6 +84,7 @@ async def prodamus_webhook(
             if payment.status == "success":
                 logger.info(f"Payment already processed: {order_id}")
                 reply = {"status": "ok", "message": "Already processed"}
+                return JSONResponse(content=reply, status_code=200)
             else:
                 payment.status = payment_status
                 payment.prodamus_payment_id = data_dict.get(
@@ -116,6 +118,7 @@ async def prodamus_webhook(
         logger.info(f"Payment processed successfully: {order_id}")
         if not reply:
             reply = {"status": "ok", "message": "Payment processed"}
+            return JSONResponse(content=reply, status_code=200)
 
     except HTTPException:
         raise
