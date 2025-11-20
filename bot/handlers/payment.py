@@ -8,7 +8,6 @@ from bot.handlers.start import start_handler
 from bot.utils.keyboards import (
     get_payment_keyboard,
     get_payment_url_keyboard,
-    get_start_keyboard_1
 )
 from bot.utils.messages import PAID_ALREADY_MESSAGE, PAYMENT_MESSAGE
 from shared.config import setup_logger
@@ -37,7 +36,11 @@ async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
                 await bot.send_message(
                     call.message.chat.id,
                     PAID_ALREADY_MESSAGE.format(
-                        user.invite_link if user.invite_link else "Потерялась 🙈"
+                        link = (
+                            user.invite_link
+                            if user.invite_link
+                            else "Ну, потерялась, ничего не поделать!"
+                        )
                     ),
                 )
                 await bot.delete_state(call.from_user.id, call.message.chat.id)

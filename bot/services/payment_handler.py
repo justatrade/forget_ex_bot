@@ -1,5 +1,11 @@
-from shared.config import setup_logger
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
 from bot.services.channel_service import ChannelService
+from shared.config import setup_logger
+from shared.database.connection import DatabaseConnection
+from shared.database.models import User
 from shared.schemas import PaymentEvent
 
 logger = setup_logger(__name__)
@@ -28,6 +34,18 @@ class PaymentHandler:
 
         try:
             result = await ChannelService.grant_access(telegram_id)
+            async with DatabaseConnection.get_session() as session:
+                session: AsyncSession
+
+                user_result = await session.execute(
+                    select(User)
+                    .options(selectinload(User.payments))
+                    .filter(User.telegram_id == telegram_id)
+                )
+                user: User = user_result.scalar_one_or_none()
+
+                user.invite_link = result
+
             logger.info(
                 f"[PaymentHandler] Access granted to user={telegram_id}, "
                 f"result={result}"
