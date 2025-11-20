@@ -59,6 +59,7 @@ class User(BaseModel):
     )
     reminder_24h_sent: Mapped[bool] = mapped_column(Boolean, default=False)
     reminder_72h_sent: Mapped[bool] = mapped_column(Boolean, default=False)
+    invite_link: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     payments: Mapped[list["Payment"]] = relationship(back_populates="user")
     insult_usage: Mapped[list["InsultUsage"]] = relationship(

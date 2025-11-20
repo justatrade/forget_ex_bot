@@ -33,10 +33,12 @@ async def payment_start_handler(call: CallbackQuery, bot: AsyncTeleBot):
         )
         user = result.scalar_one_or_none()
         if user:
-            if user.payment_status:
+            if user.payment_status == UserStatus.PAID:
                 await bot.send_message(
                     call.message.chat.id,
-                    PAID_ALREADY_MESSAGE.format,
+                    PAID_ALREADY_MESSAGE.format(
+                        user.invite_link if user.invite_link else "Потерялась 🙈"
+                    ),
                 )
                 await bot.delete_state(call.from_user.id, call.message.chat.id)
             else:
