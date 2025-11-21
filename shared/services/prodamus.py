@@ -130,6 +130,12 @@ class ProdamusService:
         )
         data["signature"] = signature
 
+        if user_id == settings.telegram.admin_id:
+            discount_value = amount - 1
+            data["products"][0]["discount_value"] = discount_value
+            logger.debug(f"Admin discount applied: {data}")
+
+
         query_params = ProdamusService._http_build_query(data)
         long_url = f"{base_url}/?{urlencode(query_params)}"
         logger.debug(f"Full link {long_url}")
