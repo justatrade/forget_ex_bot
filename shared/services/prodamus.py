@@ -124,17 +124,17 @@ class ProdamusService:
             data["demo_mode"] = "1"
             base_url = "https://demo.payform.ru"
 
-        signature = ProdamusService._sign(
-            data.copy(),
-            settings.prodamus.get_secret(settings.app.debug)
-        )
-        data["signature"] = signature
-
         if user_id == settings.telegram.admin_id:
             discount_value = amount - 1
             data["discount_value"] = discount_value
             logger.debug(f"Admin discount applied: {data}")
 
+
+        signature = ProdamusService._sign(
+            data.copy(),
+            settings.prodamus.get_secret(settings.app.debug)
+        )
+        data["signature"] = signature
 
         query_params = ProdamusService._http_build_query(data)
         long_url = f"{base_url}/?{urlencode(query_params)}"
