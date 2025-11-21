@@ -181,7 +181,15 @@ class ProdamusService:
                     logger.info(f"Final payment URL received: {final_url}")
                     return final_url
                 elif response.status_code in (301, 302, 303, 307, 308):
-                    final_url = response.headers.get("Location", long_url)
+                    logger.debug(
+                        "text.strip() after redirected status code: "
+                        f"{response.text.strip()}"
+                    )
+                    final_url = (
+                        response.headers.get("Location", long_url)
+                        if not response.text.strip()
+                        else response.text.strip()
+                    )
                     logger.info(f"Redirected to: {final_url}")
                     return final_url
                 else:
