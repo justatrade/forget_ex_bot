@@ -34,6 +34,7 @@ async def prodamus_webhook(
         if request.method == "POST":
             data = await request.form()
             if not data:
+                logger.debug("No data from request.form(), trying body()")
                 data = await request.body()
             logger.debug(
                 f"Received webhook from Prodamus: {data}, type{type(data)}"
@@ -43,26 +44,34 @@ async def prodamus_webhook(
         else:
             logger.error("Unsupported method")
             raise HTTPException(status_code=405, detail="Method not allowed")
+
+        data_dict = None
         try:
+            logger.debug("Trying convert data by dict()...")
             data_dict = dict(data)
         except TypeError:
+            logger.debug("Failed. Using json.loads()...")
             data_dict = json.loads(data)
+        finally:
+            logger.debug(f"Data: {data_dict}")
 
         logger.info(
             "Received webhook from Prodamus: "
             f"{data_dict.get(
                 settings.prodamus.var_prefix+'order_id',
                 data_dict.get('order_num'),
-            )}"
+                )}"
         )
 
         received_signature = data_dict.get(
             settings.prodamus.var_prefix + "sign",
             data_dict.get("sign"),
-        )
+            )
         if not received_signature:
+            logger.debug("Trying to get signature form header...")
             received_signature = request.headers.get("Sign")
             data_dict.update({"sign": received_signature})
+            logger.debug(f"Signature: {received_signature}")
         if not received_signature:
             logger.error(
                 "No signature in webhook. "
@@ -78,11 +87,11 @@ async def prodamus_webhook(
         order_id = data_dict.get(
             settings.prodamus.var_prefix + "order_id",
             data_dict.get("order_num"),
-        )
+            )
         payment_status = data_dict.get(
             settings.prodamus.var_prefix + "status",
-            data_dict.get("status"),
-        )
+            data_dict.get("payment_status"),
+            )
 
         if payment_status != "success":
             logger.warning(
@@ -119,7 +128,7 @@ async def prodamus_webhook(
                 payment.prodamus_payment_id = data_dict.get(
                     settings.prodamus.var_prefix + "id",
                     data_dict.get("order_id"),
-                )
+                    )
 
             if payment_status == "success":
                 payment.paid_at = datetime.now()
