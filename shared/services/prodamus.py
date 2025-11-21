@@ -132,7 +132,7 @@ class ProdamusService:
 
         if user_id == settings.telegram.admin_id:
             discount_value = amount - 1
-            data["products"][0]["discount_value"] = discount_value
+            data["discount_value"] = discount_value
             logger.debug(f"Admin discount applied: {data}")
 
 
