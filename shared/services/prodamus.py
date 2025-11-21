@@ -113,6 +113,7 @@ class ProdamusService:
                 }
             ],
             "do": "link",
+            "callbackType": "json",
             "sys": "maranaddasha",
             "urlSuccess": settings.app.success_url,
             "urlNotification": settings.app.webhook_url,

@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -32,13 +33,20 @@ async def prodamus_webhook(
     try:
         if request.method == "POST":
             data = await request.form()
+            if not data:
+                data = await request.body()
+            logger.debug(
+                f"Received webhook from Prodamus: {data}, type{type(data)}"
+            )
         elif request.method == "GET":
             data = request.query_params
         else:
             logger.error("Unsupported method")
             raise HTTPException(status_code=405, detail="Method not allowed")
-
-        data_dict = dict(data)
+        try:
+            data_dict = dict(data)
+        except TypeError:
+            data_dict = json.loads(data)
 
         logger.info(
             "Received webhook from Prodamus: "
