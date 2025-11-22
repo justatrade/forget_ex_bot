@@ -26,7 +26,7 @@ logger = setup_logger(__name__)
 async def start_handler(message: Message | CallbackQuery, bot: AsyncTeleBot):
     user = message.from_user
     came_from = CameFromService(bot)
-    referal: CameFrom = await came_from.check_user(user.id)
+    referral: CameFrom = await came_from.check_user(user.id)
     logger.info(f"User {user.id} started bot")
 
     async with DatabaseConnection.get_session() as session:
@@ -47,7 +47,7 @@ async def start_handler(message: Message | CallbackQuery, bot: AsyncTeleBot):
                 last_name=user.last_name,
                 status=UserStatus.NEW,
                 created_at=datetime.now(),
-                came_from=referal,
+                came_from=referral,
             )
             session.add(db_user)
             logger.info(f"New user {user.id} created in database")

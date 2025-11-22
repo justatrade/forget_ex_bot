@@ -14,7 +14,7 @@ class CameFromService:
     async def check_user(self, user_id: int):
         is_mara = False
         is_dasha = False
-        for owner, channel in self.channels:
+        for owner, channel in self.channels.items():
             if await self._check_user_in_channel(user_id, channel):
                 if owner == CameFrom.MARA:
                     is_mara = True
@@ -33,7 +33,7 @@ class CameFromService:
 
     async def _check_user_in_channel(self, user_id: int, channel: str) -> bool:
         try:
-            user = await self.bot.get_chat_member(user_id, channel)
+            user = await self.bot.get_chat_member(channel, user_id)
         except Exception:
             return False
         else:
