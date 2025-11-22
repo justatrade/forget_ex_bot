@@ -31,6 +31,8 @@ async def check_user_paid(telegram_id: int, bot: AsyncTeleBot) -> bool:
             )
         )
         user = result.scalar_one_or_none()
+        if user.telegram_id in settings.telegram.admin_id:
+            return False
         if user and user.status == UserStatus.PAID:
             await bot.send_message(
                 telegram_id,

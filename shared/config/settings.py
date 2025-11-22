@@ -1,13 +1,24 @@
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
 
 class TelegramSettings(BaseSettings):
     bot_token: str = Field(..., alias="BOT_TOKEN")
-    admin_id: int = Field(..., alias="ADMIN_ID")
+    admin_id: list[int] = Field(..., alias="ADMIN_ID")
+    mara_channel: str = Field(..., alias="MARA_CHANNEL_ID")
+    dasha_channel: str = Field(..., alias="DASHA_CHANNEL_ID")
+
+    @field_validator("admin_id", mode="before")
+    @classmethod
+    def convert_to_list(cls, value):
+        if isinstance(value, str):
+            return [int(v) for v in value.split(",")]
+        return value
+
 
 
 class ChannelSettings(BaseSettings):

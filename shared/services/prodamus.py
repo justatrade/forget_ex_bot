@@ -124,7 +124,7 @@ class ProdamusService:
             data["demo_mode"] = "1"
             base_url = "https://demo.payform.ru"
 
-        if user_id == settings.telegram.admin_id:
+        if user_id in settings.telegram.admin_id:
             discount_value = amount - 1
             data["discount_value"] = discount_value
             logger.debug(f"Admin discount applied: {data}")
