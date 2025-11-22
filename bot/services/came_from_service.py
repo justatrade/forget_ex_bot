@@ -34,7 +34,6 @@ class CameFromService:
     async def _check_user_in_channel(self, user_id: int, channel: str) -> bool:
         try:
             user = await self.bot.get_chat_member(channel, user_id)
+            return user.status in ["member", "creator", "administrator", "restricted"]
         except Exception as e:
             return False
-        else:
-            return bool(user)
