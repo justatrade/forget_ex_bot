@@ -42,6 +42,12 @@ class UserStatus(enum.Enum):
     PAID = "paid"
 
 
+class CameFrom(enum.Enum):
+    MARA = "Mara"
+    DASHA = "Dasha"
+    BOTH = "Both"
+    GUEST = "Guest"
+
 class User(BaseModel):
     telegram_id: Mapped[int] = mapped_column(
         BigInteger, unique=True, nullable=False, index=True
@@ -57,9 +63,10 @@ class User(BaseModel):
     last_interaction: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), onupdate=datetime.now()
     )
-    reminder_24h_sent: Mapped[bool] = mapped_column(Boolean, default=False)
-    reminder_72h_sent: Mapped[bool] = mapped_column(Boolean, default=False)
     invite_link: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    came_from: Mapped[Optional[str]] = mapped_column(
+        String, nullable=False, default=CameFrom.GUEST
+    )
 
     payments: Mapped[list["Payment"]] = relationship(back_populates="user")
     insult_usage: Mapped[list["InsultUsage"]] = relationship(
