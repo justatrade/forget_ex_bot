@@ -146,6 +146,26 @@ class RedisStreamConsumer:
         Основной loop: блокирующе читаем новые сообщения в consumer group и обрабатываем их.
         """
         await self.ensure_group()
+        try:
+            pending = await self.redis.xreadgroup(
+                groupname=self.group,
+                consumername=self.consumer,
+                streams={self.stream: "0"},
+                count=self.read_count,
+                block=20
+            )
+
+            if pending:
+                stream_name, msgs = pending[0]
+                if msgs:
+                    logger.info(f"Found pending messages: {len(pending)}")
+
+                    for stream_name, messages in pending:
+                        for msg_id, fields in messages:
+                            await self.handle_message_simple(msg_id, fields)
+
+        except Exception as e:
+            logger.exception(f"Failed to process pending messages: {e}")
 
         logger.info(
             f"Starting RedisStreamConsumer: stream={self.stream} "
@@ -155,14 +175,16 @@ class RedisStreamConsumer:
 
         while self._running:
             try:
-                resp = await self.redis.xreadgroup(
-                    groupname=self.group,
-                    consumername=self.consumer,
-                    streams={self.stream: ">"},
-                    count=self.read_count,
-                    block=self.block_ms,
+                resp = await asyncio.wait_for(
+                    self.redis.xreadgroup(
+                        groupname=self.group,
+                        consumername=self.consumer,
+                        streams={self.stream: ">"},
+                        count=self.read_count,
+                        block=self.block_ms,
+                    ),
+                    timeout=(self.block_ms / 1000) + 2,
                 )
-
                 if not resp:
                     continue
 
@@ -170,10 +192,12 @@ class RedisStreamConsumer:
                     for msg_id, fields in messages:
                         await self.handle_message_simple(msg_id, fields)
 
+            except asyncio.CancelledError:
+                logger.info("RedisStreamConsumer cancelled — graceful shutdown")
+                raise
             except Exception as e:
                 logger.exception(f"Error in listening loop: {e}")
-                # Небольшой бэкoff перед новой попыткой
-                await asyncio.sleep(1)
+                await asyncio.sleep(3)
 
         logger.info("Stopped RedisStreamConsumer loop")
 
@@ -203,8 +227,10 @@ class RedisStreamConsumer:
                 self._task.cancel()
                 try:
                     await self._task
-                except Exception:
+                except asyncio.CancelledError:
                     pass
+            except Exception:
+                pass
 
     async def run(self) -> None:
         """
