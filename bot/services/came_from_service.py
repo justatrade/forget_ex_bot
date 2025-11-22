@@ -8,7 +8,7 @@ class CameFromService:
         self.bot = bot
         self.channels = {
             CameFrom.MARA: settings.telegram.mara_channel,
-            CameFrom.DASHA: settings.telegram.mara_channel,
+            CameFrom.DASHA: settings.telegram.dasha_channel,
         }
 
     async def check_user(self, user_id: int):
@@ -34,7 +34,7 @@ class CameFromService:
     async def _check_user_in_channel(self, user_id: int, channel: str) -> bool:
         try:
             user = await self.bot.get_chat_member(channel, user_id)
-        except Exception:
+        except Exception as e:
             return False
         else:
             return bool(user)

@@ -43,10 +43,10 @@ class UserStatus(enum.Enum):
 
 
 class CameFrom(enum.Enum):
-    MARA = "Mara"
-    DASHA = "Dasha"
-    BOTH = "Both"
-    GUEST = "Guest"
+    MARA = "MARA"
+    DASHA = "DASHA"
+    BOTH = "BOTH"
+    GUEST = "GUEST"
 
 class User(BaseModel):
     telegram_id: Mapped[int] = mapped_column(
@@ -64,8 +64,8 @@ class User(BaseModel):
         DateTime(timezone=True), onupdate=datetime.now()
     )
     invite_link: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    came_from: Mapped[Optional[str]] = mapped_column(
-        String, nullable=False, default=CameFrom.GUEST
+    came_from: Mapped[CameFrom] = mapped_column(
+        Enum(CameFrom), nullable=False, default=CameFrom.GUEST
     )
 
     payments: Mapped[list["Payment"]] = relationship(back_populates="user")

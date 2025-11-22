@@ -9,7 +9,7 @@ from bot.utils.messages import (
     START_MESSAGE_2
 )
 from bot.utils.states import StartStates
-from shared.config import setup_logger
+from shared.config import settings, setup_logger
 from shared.database.connection import DatabaseConnection
 from shared.database.models import CameFrom, User, UserStatus
 
@@ -51,6 +51,9 @@ async def start_handler(message: Message | CallbackQuery, bot: AsyncTeleBot):
             )
             session.add(db_user)
             logger.info(f"New user {user.id} created in database")
+        else:
+            if db_user.telegram_id in settings.telegram.admin_id:
+                db_user.came_from = referral
 
     message_text = START_MESSAGE_1.replace(
         "Дарья Фурман", f"<a href='{DARIA_CHANNEL}'>Дарья Фурман</a>"
