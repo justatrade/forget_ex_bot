@@ -8,7 +8,7 @@ load_dotenv()
 
 class TelegramSettings(BaseSettings):
     bot_token: str = Field(..., alias="BOT_TOKEN")
-    admin_id: list[int] = Field(..., alias="ADMIN_ID")
+    admin_id: int|str|list[int] = Field(..., alias="ADMIN_ID")
     mara_channel: str = Field(..., alias="MARA_CHANNEL_ID")
     dasha_channel: str = Field(..., alias="DASHA_CHANNEL_ID")
 
