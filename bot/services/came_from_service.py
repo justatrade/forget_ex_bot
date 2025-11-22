@@ -7,8 +7,8 @@ class CameFromService:
     def __init__(self, bot: AsyncTeleBot):
         self.bot = bot
         self.channels = {
-            CameFrom.MARA: settings.telegram.mara_channel_id,
-            CameFrom.DASHA: settings.telegram.mara_channel_id,
+            CameFrom.MARA: settings.telegram.mara_channel,
+            CameFrom.DASHA: settings.telegram.mara_channel,
         }
 
     async def check_user(self, user_id: int):
