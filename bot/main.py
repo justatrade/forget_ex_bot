@@ -20,6 +20,7 @@ redis_client = Redis(
     host=settings.redis.host,
     port=settings.redis.port,
     db=settings.redis.db,
+    password=settings.redis.password,
     decode_responses=True,
 )
 
@@ -27,6 +28,7 @@ state_storage = StateRedisStorage(
     host=settings.redis.host,
     port=settings.redis.port,
     db=settings.redis.db,
+    password=settings.redis.password,
 )
 bot = AsyncTeleBot(settings.telegram.bot_token, state_storage=state_storage)
 redis_consumer: RedisStreamConsumer | None = None
