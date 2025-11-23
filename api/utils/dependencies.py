@@ -21,6 +21,7 @@ class RedisManager:
                 host=settings.redis.host,
                 port=settings.redis.port,
                 db=settings.redis.db,
+                password=settings.redis.password,
                 decode_responses=True,
             )
         return cls._redis_client

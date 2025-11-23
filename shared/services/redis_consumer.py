@@ -43,7 +43,12 @@ class RedisStreamConsumer:
         MKSTREAM=True создаёт сам stream, если он ещё не существует.
         """
         try:
-            await self.redis.xgroup_create(self.stream, self.group, id="$", mkstream=True)
+            await self.redis.xgroup_create(
+                name=self.stream,
+                groupname=self.group,
+                id="$",
+                mkstream=True,
+            )
             logger.info(
                 f"Created consumer group '{self.group}' "
                 f"on stream '{self.stream}'"
@@ -52,7 +57,7 @@ class RedisStreamConsumer:
             msg = str(e)
             if "BUSYGROUP" in msg or "NOGROUP" in msg:
                 logger.debug(
-                    f"Consumer group '{self.group}' already exists ({msg})"
+                        f"Consumer group '{self.group}' already exists ({msg})"
                 )
             else:
                 logger.exception(f"Error creating group: {e}")
@@ -147,22 +152,24 @@ class RedisStreamConsumer:
         """
         await self.ensure_group()
         try:
-            pending = await self.redis.xreadgroup(
-                groupname=self.group,
-                consumername=self.consumer,
-                streams={self.stream: "0"},
-                count=self.read_count,
-                block=20
-            )
+            info = await self.redis.xpending(self.stream, self.group)
+            if info.get("pending", 0) > 0:
+                pending = await self.redis.xreadgroup(
+                    groupname=self.group,
+                    consumername=self.consumer,
+                    streams={self.stream: "0"},
+                    count=self.read_count,
+                    block=20
+                )
 
-            if pending:
-                stream_name, msgs = pending[0]
-                if msgs:
-                    logger.info(f"Found pending messages: {len(pending)}")
+                if pending:
+                    _, msgs = pending[0]
+                    if msgs:
+                        logger.info(f"Found pending messages: {len(pending)}")
 
-                    for stream_name, messages in pending:
-                        for msg_id, fields in messages:
-                            await self.handle_message_simple(msg_id, fields)
+                        for stream_name, messages in pending:
+                            for msg_id, fields in messages:
+                                await self.handle_message_simple(msg_id, fields)
 
         except Exception as e:
             logger.exception(f"Failed to process pending messages: {e}")

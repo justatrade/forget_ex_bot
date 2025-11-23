@@ -48,6 +48,7 @@ class DatabaseSettings(BaseSettings):
 class RedisSettings(BaseSettings):
     host: str = Field("redis", alias="REDIS_HOST")
     port: int = Field(6379, alias="REDIS_PORT")
+    password: str = Field(..., alias="REDIS_PASSWORD")
     db: int = Field(0, alias="REDIS_DB")
     stream_name: str = Field("payments_stream", alias="REDIS_STREAM_NAME")
     group_name: str = Field("bot_group", alias="REDIS_GROUP_NAME")

@@ -22,7 +22,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: forget_ex_redis
-    command: redis-server --appendonly yes --appendfsync everysec
+    command: redis-server --appendonly yes --appendfsync everysec --requirepass ${REDIS_PASSWORD}
     volumes:
       - ./redis_data:/data
       - /etc/localtime:/etc/localtime:ro
