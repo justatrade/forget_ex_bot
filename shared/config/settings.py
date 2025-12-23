@@ -11,14 +11,14 @@ class TelegramSettings(BaseSettings):
     admin_id: int|str|list[int] = Field(..., alias="ADMIN_ID")
     mara_channel: str = Field(..., alias="MARA_CHANNEL_ID")
     dasha_channel: str = Field(..., alias="DASHA_CHANNEL_ID")
+    sell_mode: str = Field(..., alias="BOT_SELL_MODE")
 
     @field_validator("admin_id", mode="before")
     @classmethod
     def convert_to_list(cls, value):
         if isinstance(value, str):
             return [int(v) for v in value.split(",")]
-        return value
-
+        return [value]
 
 
 class ChannelSettings(BaseSettings):
@@ -86,6 +86,36 @@ class AppSettings(BaseSettings):
     log_level: str = Field("INFO", alias="LOG_LEVEL")
 
 
+class SpecialSettings(BaseSettings):
+    common_price: int = Field(..., alias="SPECIAL_COMMON_PRICE")
+    description_feb: str = Field(..., alias="SPECIAL_DESCRIPTION_FEB")
+    description_ny: str = Field(..., alias="SPECIAL_DESCRIPTION_NY")
+    description_12: str = Field(..., alias="SPECIAL_DESCRIPTION_12")
+    description_all: str = Field(..., alias="SPECIAL_DESCRIPTION_ALL")
+    channel_feb: str = Field(..., alias="SPECIAL_CHANNEL_FEB")
+    channel_ny: str = Field(..., alias="SPECIAL_CHANNEL_NY")
+    channel_12: str = Field(..., alias="SPECIAL_CHANNEL_12")
+
+
+class RobokassaSettings(BaseSettings):
+    payment_url: str = Field(..., alias="ROBOKASSA_PAYMENT_URL")
+    merchant_login: str = Field(..., alias="ROBOKASSA_MERCHANT_LOGIN")
+    prod_password_1: str = Field(..., alias="ROBOKASSA_PASSWORD_1")
+    prod_password_2: str = Field(..., alias="ROBOKASSA_PASSWORD_2")
+    test_password_1: str = Field(..., alias="ROBOKASSA_TEST_PASSWORD_1")
+    test_password_2: str = Field(..., alias="ROBOKASSA_TEST_PASSWORD_2")
+    receipt: bool = Field(False, alias="ROBOKASSA_CREATE_RECEIPT")
+    is_test: int = Field(..., alias="ROBOKASSA_IS_TEST")
+
+    @property
+    def password_1(self) -> str:
+        return self.test_password_1 if self.is_test else self.prod_password_1
+
+    @property
+    def password_2(self) -> str:
+        return self.test_password_2 if self.is_test else self.prod_password_2
+
+
 class Settings:
     telegram: TelegramSettings = TelegramSettings()
     channel: ChannelSettings = ChannelSettings()
@@ -94,6 +124,7 @@ class Settings:
     prodamus: ProdamusSettings = ProdamusSettings()
     price: PriceSettings = PriceSettings()
     app: AppSettings = AppSettings()
-
+    special: SpecialSettings = SpecialSettings()
+    rk: RobokassaSettings = RobokassaSettings()
 
 settings = Settings()

@@ -3,6 +3,7 @@ from telebot.async_telebot import AsyncTeleBot
 from shared.config import settings
 from shared.database.models import CameFrom
 
+
 class CameFromService:
     def __init__(self, bot: AsyncTeleBot):
         self.bot = bot
@@ -29,7 +30,6 @@ class CameFromService:
             return CameFrom.DASHA
         else:
             return CameFrom.GUEST
-
 
     async def _check_user_in_channel(self, user_id: int, channel: str) -> bool:
         try:
