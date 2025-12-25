@@ -200,7 +200,7 @@ async def ny_special_payment_handler(call: CallbackQuery, bot: AsyncTeleBot):
         bot,
         DashasSpecial(
             name="Доступ к " + settings.special.description_ny,
-            price=settings.special.common_price + 100,
+            price=settings.special.common_price,
             description=settings.special.description_ny,
             code="ny_special",
         )
@@ -213,7 +213,7 @@ async def feb_special_payment_handler(call: CallbackQuery, bot: AsyncTeleBot):
         bot,
         DashasSpecial(
             name="Доступ к " + settings.special.description_feb,
-            price=settings.special.common_price + 200,
+            price=settings.special.common_price,
             description=settings.special.description_feb,
             code="feb_special",
         )
@@ -226,8 +226,8 @@ async def twelve_days_special_payment_handler(call: CallbackQuery, bot: AsyncTel
         bot,
         DashasSpecial(
             name="Доступ к " + settings.special.description_12,
-            price=settings.special.common_price + 300,
-            description=settings.special.description_feb,
+            price=settings.special.twelve_price,
+            description=settings.special.description_12,
             code="twelve_special",
         )
     )
@@ -239,7 +239,7 @@ async def all_special_payment_handler(call: CallbackQuery, bot: AsyncTeleBot):
         bot,
         DashasSpecial(
             name="Доступ к " + settings.special.description_all,
-            price=settings.special.common_price + 400,
+            price=settings.special.all_price,
             description=settings.special.description_all,
             code="all_special",
         )

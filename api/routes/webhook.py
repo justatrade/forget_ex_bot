@@ -190,6 +190,16 @@ async def robokassa_result(
     except Exception as e:
         logger.error("Robokassa RESULT handler failed", exc_info=True)
 
+        await publisher.publish(
+            {
+                "source": "robokassa",
+                "path": str(request.url.path),
+                "query": dict(request.query_params),
+                "error": str(e),
+            },
+            settings.redis.dlq_stream,
+        )
+
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

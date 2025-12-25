@@ -52,29 +52,37 @@ async def get_special_payment_keyboard(
         user_presence: DashaChannelPresence
 ) -> InlineKeyboardMarkup | None:
     pay_via_rk_val = InlineKeyboardButton(
-        text="Оплатить Valentine Special ❤", callback_data="pay_via_rk_val"
+        text=
+        settings.special.channel_feb + " " + str(settings.special.common_price),
+        callback_data="pay_via_rk_val",
     )
     pay_via_rk_ny = InlineKeyboardButton(
-        text="Оплатить New Year Special 🎄", callback_data="pay_via_rk_ny"
+        text=
+        settings.special.channel_ny + " " + str(settings.special.common_price),
+        callback_data="pay_via_rk_ny",
     )
     pay_via_rk_12 = InlineKeyboardButton(
-        text="Оплатить 8ой Сезон 👯‍♀", callback_data="pay_via_rk_12"
+        text=
+        settings.special.description_12 + " " + str(settings.special.twelve_price),
+        callback_data="pay_via_rk_12",
     )
     pay_via_rk_all = InlineKeyboardButton(
-        text="Все сезоны -25% 👯‍♀", callback_data="pay_via_rk_all"
+        text=
+        settings.special.description_all + " " + str(settings.special.all_price),
+        callback_data="pay_via_rk_all",
     )
     markup = InlineKeyboardMarkup()
     if user_presence.all_special:
         return None
+
+    if not user_presence.twelve_special:
+        markup.add(pay_via_rk_12)
 
     if not user_presence.ny_special:
         markup.add(pay_via_rk_ny)
 
     if not user_presence.feb_special:
         markup.add(pay_via_rk_val)
-
-    if not user_presence.twelve_special:
-        markup.add(pay_via_rk_12)
 
     if not user_presence.any_special:
         markup.add(pay_via_rk_all)

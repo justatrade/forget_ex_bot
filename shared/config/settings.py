@@ -88,6 +88,8 @@ class AppSettings(BaseSettings):
 
 class SpecialSettings(BaseSettings):
     common_price: int = Field(..., alias="SPECIAL_COMMON_PRICE")
+    twelve_price: int = Field(..., alias="SPECIAL_TWELVE_PRICE")
+    all_price: int = Field(..., alias="SPECIAL_ALL_PRICE")
     description_feb: str = Field(..., alias="SPECIAL_DESCRIPTION_FEB")
     description_ny: str = Field(..., alias="SPECIAL_DESCRIPTION_NY")
     description_12: str = Field(..., alias="SPECIAL_DESCRIPTION_12")
