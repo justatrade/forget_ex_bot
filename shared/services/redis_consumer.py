@@ -40,7 +40,7 @@ class RedisStreamConsumer:
     async def ensure_group(self) -> None:
         """
         Создаёт consumer group, если её нет.
-        MKSTREAM=True создаёт сам stream, если он ещё не существует.
+        mkstream=True создаёт сам stream, если он ещё не существует.
         """
         try:
             await self.redis.xgroup_create(
@@ -138,7 +138,7 @@ class RedisStreamConsumer:
                 f"Received valid PaymentEvent id={msg_id} payload={event}"
             )
 
-            await PaymentHandler.process(event)
+            await PaymentHandler().process(event)
             await self.redis.xack(self.stream, self.group, msg_id)
             logger.info(
                 f"Acknowledged message id={msg_id} after successful processing"

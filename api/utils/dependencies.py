@@ -6,6 +6,7 @@ from shared.services import RedisStreamPublisher
 
 logger = setup_logger(__name__)
 
+
 async def get_publisher():
     redis_client = RedisManager.get_client()
     return RedisStreamPublisher(client=redis_client)

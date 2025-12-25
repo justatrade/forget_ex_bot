@@ -15,7 +15,7 @@ from sqlalchemy.types import Integer
 
 import enum
 import re
-from datetime import date, datetime, UTC
+from datetime import date, datetime
 from typing import Optional
 
 
@@ -35,6 +35,17 @@ class BaseModel:
         super().__init__(**kwargs)
 
 
+class PaymentSystem(enum.Enum):
+    PRODAMUS = "PRODAMUS"
+    ROBOKASSA = "ROBOKASSA"
+
+
+class PaymentStatus(enum.Enum):
+    PENDING = "pending"
+    FAILED = "failed"
+    SUCCESS = "success"
+
+
 class UserStatus(enum.Enum):
     NEW = "new"
     INTERESTED = "interested"
@@ -47,6 +58,7 @@ class CameFrom(enum.Enum):
     DASHA = "DASHA"
     BOTH = "BOTH"
     GUEST = "GUEST"
+
 
 class User(BaseModel):
     telegram_id: Mapped[int] = mapped_column(
@@ -81,12 +93,20 @@ class Payment(BaseModel):
     order_id: Mapped[int] = mapped_column(String, unique=True, nullable=False)
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     promo_code: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    status: Mapped[str] = mapped_column(String, default="pending")
-    prodamus_payment_id: Mapped[Optional[str]] = mapped_column(
+    status: Mapped[PaymentStatus] = mapped_column(
+        Enum(PaymentStatus), default=PaymentStatus.PENDING
+    )
+    payment_system: Mapped[PaymentSystem] = mapped_column(
+        Enum(PaymentSystem), nullable=False
+    )
+    product: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    external_payment_id: Mapped[Optional[str]] = mapped_column(
         String, nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    paid_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    paid_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     user: Mapped["User"] = relationship(back_populates="payments")
 

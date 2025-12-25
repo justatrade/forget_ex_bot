@@ -9,10 +9,13 @@ class RedisStreamPublisher:
         self.client = client
 
     async def publish(
-        self, event: PaymentEvent,
+        self, event: PaymentEvent | dict,
         stream: str = settings.redis.stream_name
     ):
-        data = event.model_dump_json(ensure_ascii=False)
+        if isinstance(event, PaymentEvent):
+            data = event.model_dump_json(ensure_ascii=False)
+        else:
+            data = event
         return await self.client.xadd(
             name=stream,
             fields={"data": data}

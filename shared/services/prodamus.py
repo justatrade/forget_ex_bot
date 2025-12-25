@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 from shared.config import settings
 from shared.config import setup_logger
 from shared.database.connection import DatabaseConnection
-from shared.database.models import Payment, User
+from shared.database.models import Payment, User, PaymentStatus
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -95,7 +95,7 @@ class ProdamusService:
                 user_id=user.id,
                 order_id=order_id,
                 amount=amount,
-                status="pending",
+                status=PaymentStatus.PENDING,
                 created_at=datetime.now(),
             )
             session.add(payment)
@@ -128,7 +128,6 @@ class ProdamusService:
             discount_value = amount - 1
             data["discount_value"] = discount_value
             logger.debug(f"Admin discount applied: {data}")
-
 
         signature = ProdamusService._sign(
             data.copy(),
