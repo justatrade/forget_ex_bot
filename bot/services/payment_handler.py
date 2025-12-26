@@ -98,7 +98,7 @@ class PaymentHandler:
             payment: Payment = payment_result.scalar_one_or_none()
             if payment.product == "all_special":
                 channels = [
-                    v for k, v
+                    k for k, v
                     in CHANNEL_FIELD_TO_ID_MAP.items()
                     if k.endswith("_special")
                 ]
