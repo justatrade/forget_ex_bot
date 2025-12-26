@@ -131,6 +131,6 @@ class PaymentHandler:
                         f"user={event.user_id}: {e}, event={event}"
                     )
                     raise
-            user.invite_link = ",".join(invite_links)
+            user.invite_link += ",".join(invite_links)
             await session.flush()
             await session.commit()
