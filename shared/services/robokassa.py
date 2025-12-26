@@ -51,7 +51,7 @@ class RobokassaService:
         signature = cls._calculate_signature(
             result.OutSum,
             result.InvId,
-            settings.rk.password_2
+            settings.rk.password_1
         )
         return signature == result.SignatureValue
 
