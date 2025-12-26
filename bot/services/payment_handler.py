@@ -110,9 +110,16 @@ class PaymentHandler:
                     )
                     continue
                 try:
+                    logger.debug(
+                        f"Granting access to {channel} "
+                        f"for user={event.user_id}"
+                    )
                     result = await ChannelService.grant_access(
                         event.user_id,
                         CHANNEL_FIELD_TO_ID_MAP[channel],
+                    )
+                    logger.debug(
+                        f"Sending notification to user={event.user_id}"
                     )
                     await ChannelService.send_notification(
                         event.user_id,
@@ -121,7 +128,7 @@ class PaymentHandler:
                     invite_links.append(result)
 
                     logger.info(
-                        f"[PaymentHandler] Access in channel {channel}"
+                        f"[PaymentHandler] Access in channel {channel} "
                         f"granted to user={event.user_id}, "
                         f"result={result}"
                     )
@@ -130,7 +137,10 @@ class PaymentHandler:
                         "[PaymentHandler] Failed to process event for "
                         f"user={event.user_id}: {e}, event={event}"
                     )
+                    invite_links.append(f"error_{payment.id}")
                     raise
-            user.invite_link += ",".join(invite_links)
+            if user.invite_link:
+                invite_links.insert(0, user.invite_link)
+            user.invite_link = ",".join(invite_links)
             await session.flush()
             await session.commit()
