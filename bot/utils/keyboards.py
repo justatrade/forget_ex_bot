@@ -53,18 +53,18 @@ async def get_special_payment_keyboard(
 ) -> InlineKeyboardMarkup | None:
     pay_via_rk_val = InlineKeyboardButton(
         text=
-        settings.special.channel_feb + " " + str(settings.special.common_price),
+        settings.special.description_feb + " " + str(settings.special.common_price),
         callback_data="pay_via_rk_val",
     )
     pay_via_rk_ny = InlineKeyboardButton(
         text=
-        settings.special.channel_ny + " " + str(settings.special.common_price),
+        settings.special.description_ny + " " + str(settings.special.common_price),
         callback_data="pay_via_rk_ny",
     )
     pay_via_rk_12 = InlineKeyboardButton(
         text=
         settings.special.description_12 + " " + str(settings.special.twelve_price),
-        callback_data="pay_via_rk_12",
+        callback_data="pay_via_rk_twelve",
     )
     pay_via_rk_all = InlineKeyboardButton(
         text=

@@ -62,7 +62,7 @@ PAYMENT_MESSAGE = """
 
 CHANNEL_INVITE_LINK_MESSAGE  = """
 Вот твоя ссылка на канал:\n
-{channel_link}
+<a href='{channel_link}'>Жми скорее!</a>
 """
 
 PAYMENT_SUCCESS_MESSAGE = """

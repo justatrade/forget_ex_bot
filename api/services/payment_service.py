@@ -7,8 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from shared.config import setup_logger
 from shared.database.connection import DatabaseConnection
-from shared.database.models import Payment
-from shared.database.models import PaymentStatus
+from shared.database.models import Payment, PaymentStatus, UserStatus
 from shared.schemas import PaymentEvent, RobokassaResult
 from shared.services import RedisStreamPublisher
 
@@ -54,11 +53,13 @@ class RobokassaPaymentService(PaymentService):
             payment.paid_at = datetime.now()
 
             if payment_status == PaymentStatus.SUCCESS:
+                payment.user.payment_status = True
+                payment.user.status = UserStatus.PAID
                 event = PaymentEvent(
                     payment_id=payment.id,
                     amount=int(float(payload.OutSum)),
                     user_id=payment.user.telegram_id,
-                    status="success",
+                    status=payment_status,
                     paid_at=payment.paid_at,
                 )
 

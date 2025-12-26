@@ -62,6 +62,8 @@ class ChannelService:
         await cls._bot.send_message(
             telegram_id,
             message,
+            parse_mode="HTML",
+            disable_web_page_preview=False,
         )
 
     @classmethod

@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from api.routes import webhook, insults
 from api.utils import has_access, lifespan
@@ -7,6 +10,8 @@ from shared.config import setup_logger
 from shared.config import settings
 
 logger = setup_logger(__name__)
+
+STATIC_DIR = Path(__file__).parent / "static"
 
 app = FastAPI(
     lifespan=lifespan,
@@ -27,6 +32,7 @@ app.add_middleware(
 
 app.include_router(webhook.router)
 app.include_router(insults.router, dependencies=[Depends(has_access)])
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/")

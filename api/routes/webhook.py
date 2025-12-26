@@ -1,9 +1,8 @@
 import json
 from datetime import datetime
 
-import pydantic
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import JSONResponse, PlainTextResponse, HTMLResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -13,12 +12,8 @@ from shared.config import setup_logger
 from shared.config import settings
 from shared.database.connection import DatabaseConnection
 from shared.database.models import Payment, PaymentStatus, User, UserStatus
-from shared.schemas import PaymentEvent, RobokassaResult
-from shared.services import (
-    ProdamusService,
-    RedisStreamPublisher,
-    RobokassaService,
-)
+from shared.schemas import PaymentEvent
+from shared.services import ProdamusService, RedisStreamPublisher
 
 
 logger = setup_logger(__name__)
@@ -93,12 +88,17 @@ async def prodamus_webhook(
             settings.prodamus.var_prefix + "order_id",
             data_dict.get("order_num"),
             )
-        payment_status = data_dict.get(
+        raw_status = data_dict.get(
             settings.prodamus.var_prefix + "status",
             data_dict.get("payment_status"),
             )
+        try:
+            payment_status = PaymentStatus(raw_status)
+        except ValueError:
+            logger.warning(f"Unknown payment status: {raw_status!r}")
+            payment_status = PaymentStatus.FAILED
 
-        if payment_status != PaymentStatus.SUCCESS.value:
+        if payment_status != PaymentStatus.SUCCESS:
             logger.warning(
                 f"Payment not successful: {order_id}, status: {payment_status}."
                 f"Data: {data_dict}"
@@ -135,7 +135,7 @@ async def prodamus_webhook(
                     data_dict.get("order_id"),
                     )
 
-            if payment_status == PaymentStatus.SUCCESS.value:
+            if payment_status == PaymentStatus.SUCCESS:
                 payment.paid_at = datetime.now()
 
                 user_result = await session.execute(
@@ -203,7 +203,7 @@ async def robokassa_result(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.get("/robokassa/success")
+@router.get("/robokassa/success", response_class=RedirectResponse)
 async def robokassa_success(
     request: Request,
     publisher: RedisStreamPublisher = Depends(get_publisher),
@@ -218,7 +218,7 @@ async def robokassa_success(
         logger.error(f"Robokassa success handler failed: {e}")
         return HTTPException(status_code=500, detail="Internal server error")
     else:
-        return HTMLResponse("Оплата прошла успешно 💚")
+        return "/static/success.html"
 
 
 @router.get("/robokassa/fail")
@@ -235,4 +235,4 @@ async def robokassa_success(
     except Exception as e:
         logger.error(f"Robokassa fail handler failed: {e}")
 
-    return HTMLResponse("Оплата не была завершена ❌")
+    return "/static/fail.html"

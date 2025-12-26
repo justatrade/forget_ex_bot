@@ -188,13 +188,14 @@ async def payment_link(
     )
     await bot.send_message(
         call.message.chat.id,
-        text=f"<a href=\'{pay_link}\'>Оплатить</a>",
+        text=f"{product.description}",
         parse_mode="HTML",
         reply_markup=markup
     )
 
 
 async def ny_special_payment_handler(call: CallbackQuery, bot: AsyncTeleBot):
+    await bot.answer_callback_query(call.id)
     await payment_link(
         call,
         bot,
@@ -208,6 +209,7 @@ async def ny_special_payment_handler(call: CallbackQuery, bot: AsyncTeleBot):
 
 
 async def feb_special_payment_handler(call: CallbackQuery, bot: AsyncTeleBot):
+    await bot.answer_callback_query(call.id)
     await payment_link(
         call,
         bot,
@@ -220,7 +222,10 @@ async def feb_special_payment_handler(call: CallbackQuery, bot: AsyncTeleBot):
     )
 
 
-async def twelve_days_special_payment_handler(call: CallbackQuery, bot: AsyncTeleBot):
+async def twelve_days_special_payment_handler(
+    call: CallbackQuery, bot: AsyncTeleBot
+):
+    await bot.answer_callback_query(call.id)
     await payment_link(
         call,
         bot,
@@ -234,6 +239,7 @@ async def twelve_days_special_payment_handler(call: CallbackQuery, bot: AsyncTel
 
 
 async def all_special_payment_handler(call: CallbackQuery, bot: AsyncTeleBot):
+    await bot.answer_callback_query(call.id)
     await payment_link(
         call,
         bot,
