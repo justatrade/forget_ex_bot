@@ -188,7 +188,10 @@ async def robokassa_result(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Robokassa RESULT handler failed", exc_info=True)
+        logger.error(
+            f"Robokassa RESULT handler failed: {request}",
+            exc_info=True,
+        )
 
         await publisher.publish(
             {
@@ -209,15 +212,17 @@ async def robokassa_success(
     publisher: RedisStreamPublisher = Depends(get_publisher),
 ):
     try:
-        await handle_robokassa_payload(
+        payload = await handle_robokassa_payload(
             request, publisher, PaymentStatus.SUCCESS
         )
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Robokassa success handler failed: {e}")
-        return HTTPException(status_code=500, detail="Internal server error")
+        logger.error(f"Robokassa SUCCESS handler failed: {e}, {request}")
+        raise HTTPException(status_code=500, detail="Internal server error")
     else:
+        logger.info(f"Processed SUCCESS handler with payload: {payload}")
+
         return "/static/success.html"
 
 
@@ -227,12 +232,15 @@ async def robokassa_success(
     publisher: RedisStreamPublisher = Depends(get_publisher),
 ):
     try:
-        await handle_robokassa_payload(
+        payload = await handle_robokassa_payload(
             request, publisher, PaymentStatus.FAILED
         )
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Robokassa fail handler failed: {e}")
+        logger.error(f"Robokassa FAIL handler failed: {e}, {request}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+    else:
+        logger.info(f"Processed SUCCESS handler with payload: {payload}")
 
-    return "/static/fail.html"
+        return "/static/fail.html"

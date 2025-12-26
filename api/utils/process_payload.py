@@ -26,6 +26,7 @@ async def handle_robokassa_payload(
     if not RobokassaService.check_signature(payload):
         raise HTTPException(status_code=403, detail="Invalid signature")
 
+    logger.debug(f"Processing Robokassa payment with payload: {payload}")
     await RobokassaPaymentService.process_payment(
         payload, publisher, payment_status
     )
