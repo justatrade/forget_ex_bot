@@ -42,7 +42,7 @@ class DashaMaraChannelPresence(BaseModel):
     mara: bool = False
 
 
-CHANNEL_ID_TO_FIELD_MAP = {
+CHANNEL_ID_TO_FIELD_MAP: dict[int, str] = {
     settings.special.channel_ny: "ny_special",
     settings.special.channel_feb: "feb_special",
     settings.special.channel_12: "twelve_special",
@@ -50,4 +50,7 @@ CHANNEL_ID_TO_FIELD_MAP = {
     settings.telegram.mara_channel: "mara",
 }
 
-CHANNEL_FIELD_TO_ID_MAP = {v: k for k, v in CHANNEL_ID_TO_FIELD_MAP.items()}
+CHANNEL_FIELD_TO_ID_MAP: dict[str, int] = {
+    v: k for k, v
+    in CHANNEL_ID_TO_FIELD_MAP.items()
+}
