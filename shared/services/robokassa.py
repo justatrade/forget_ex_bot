@@ -71,13 +71,12 @@ class RobokassaService:
             is_test: int = 0,
     ) -> str:
         data = {}
-        price = product.price if settings.rk.is_test else f"{product.price:.2f}"
+        price = product.price
         signature_args = [
             merchant_login,
             price,
             invoice_id,
             password_1,
-            # f"shp_telegram={user_tg_id}",
         ]
 
         if settings.rk.receipt:
@@ -92,11 +91,10 @@ class RobokassaService:
                 "OutSum": product.price,
                 "InvoiceID": invoice_id,
                 "Description": cls._clean_text(product.description),
-                # "shp_telegram": user_tg_id,
                 "SignatureValue": signature,
-                "IsTest": is_test
             }
         )
+        data.update({"IsTest": is_test} if is_test else {})
 
         request_url = f"{settings.rk.payment_url}?{parse.urlencode(data)}"
         response = await requests_async.get(request_url)
