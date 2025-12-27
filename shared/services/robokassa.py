@@ -41,19 +41,20 @@ class RobokassaService:
                     "name": RobokassaService._clean_text(product.name),
                     "quantity": 1,
                     "sum": product.price,
+                    "tax": "none",
                 }
             ]
         }
         return json.dumps(receipt_dict, ensure_ascii=False)
 
     @classmethod
-    def check_signature(cls, result: RobokassaResult):
+    def check_signature(cls, result: RobokassaResult, password: str):
         signature = cls._calculate_signature(
             result.OutSum,
             result.InvId,
-            settings.rk.password_1
+            password,
         )
-        return signature == result.SignatureValue
+        return signature == result.SignatureValue.lower()
 
 
     @staticmethod

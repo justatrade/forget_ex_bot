@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional, Any
 
 from pydantic import BaseModel, field_validator
@@ -6,11 +7,17 @@ from pydantic import BaseModel, field_validator
 from shared.database.models import PaymentStatus
 
 
+class ReturnUrl(Enum):
+    result = "result"
+    success = "success"
+    fail = "fail"
+
+
 class PaymentEvent(BaseModel):
     payment_id: int
     user_id: int
     status: PaymentStatus = PaymentStatus.PENDING
-    amount: Optional[int] = None
+    amount: Optional[int|str] = None
     currency: Optional[str] = "RUB"
     paid_at: Optional[datetime] = None
     meta: Optional[dict[str, Any]] = None
@@ -28,7 +35,7 @@ class RobokassaResult(BaseModel):
     def convert(v):
         if isinstance(v, str):
             return v
-        return f"{v:.2f}"
+        return f"{v:.6f}"
 
 
 class ProdamusPayment(PaymentEvent):

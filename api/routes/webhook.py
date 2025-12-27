@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import JSONResponse, PlainTextResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -12,7 +12,7 @@ from shared.config import setup_logger
 from shared.config import settings
 from shared.database.connection import DatabaseConnection
 from shared.database.models import Payment, PaymentStatus, User, UserStatus
-from shared.schemas import PaymentEvent
+from shared.schemas import PaymentEvent, ReturnUrl
 from shared.services import ProdamusService, RedisStreamPublisher
 
 
@@ -181,7 +181,7 @@ async def robokassa_result(
 ):
     try:
         payload = await handle_robokassa_payload(
-            request, publisher, PaymentStatus.SUCCESS
+            request, publisher, PaymentStatus.SUCCESS, ReturnUrl.result
         )
         return PlainTextResponse(f"OK{payload.InvId}")
 
@@ -213,7 +213,7 @@ async def robokassa_success(
 ):
     try:
         payload = await handle_robokassa_payload(
-            request, publisher, PaymentStatus.SUCCESS
+            request, publisher, PaymentStatus.SUCCESS, ReturnUrl.success
         )
     except HTTPException:
         raise
@@ -233,7 +233,7 @@ async def robokassa_success(
 ):
     try:
         payload = await handle_robokassa_payload(
-            request, publisher, PaymentStatus.FAILED
+            request, publisher, PaymentStatus.FAILED, ReturnUrl.fail
         )
     except HTTPException:
         raise

@@ -57,7 +57,7 @@ class RobokassaPaymentService(PaymentService):
                 payment.user.status = UserStatus.PAID
                 event = PaymentEvent(
                     payment_id=payment.id,
-                    amount=int(float(payload.OutSum)),
+                    amount=payload.OutSum,
                     user_id=payment.user.telegram_id,
                     status=payment_status,
                     paid_at=payment.paid_at,
