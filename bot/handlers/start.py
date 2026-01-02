@@ -1,6 +1,15 @@
 from pathlib import Path
 from datetime import datetime
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from telebot.async_telebot import AsyncTeleBot
+from telebot.types import (
+    CallbackQuery,
+    Message,
+    User as TGUser,
+)
+
 from bot.utils.keyboards import (
     get_start_keyboard_1,
     get_start_keyboard_2,
@@ -15,21 +24,11 @@ from bot.utils.messages import (
     START_MESSAGE_2,
     START_SPECIAL_MESSAGE,
 )
-from bot.services import ChannelService
+from bot.services import CameFromService, ChannelService
 from shared.config import settings, setup_logger
 from shared.database.connection import DatabaseConnection
 from shared.database.models import CameFrom, User, UserStatus
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from telebot.async_telebot import AsyncTeleBot
-from telebot.types import (
-    CallbackQuery,
-    Message,
-    User as TGUser,
-)
-
-from bot.services.came_from_service import CameFromService
 
 logger = setup_logger(__name__)
 
@@ -160,12 +159,13 @@ async def start_next_handler(call: CallbackQuery, bot: AsyncTeleBot):
 def register_handlers(bot: AsyncTeleBot):
     bot.register_message_handler(
         lambda msg: start_handler(msg, bot),
-        commands=['start'],
-        pass_bot=True
+        commands=["start"],
+        pass_bot=True,
+        chat_types=["private"],
     )
 
     bot.register_callback_query_handler(
         lambda call: start_next_handler(call, bot),
         func=lambda call: call.data == "start_next",
-        pass_bot=True
+        pass_bot=True,
     )

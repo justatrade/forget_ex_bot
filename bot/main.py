@@ -4,10 +4,12 @@ import time
 from redis.asyncio import Redis
 from telebot.async_telebot import AsyncTeleBot
 from telebot.asyncio_storage import StateRedisStorage
+from telebot.types import BotCommand
 
-from bot.handlers import start, payment#, insults, common
+from bot.handlers import admin, payment, start#, insults, common
 from bot.services import ChannelService
 # from bot.scheduler.reminders import start_scheduler
+from bot.utils.messages import START_COMMAND_CAPTION
 from shared.config import setup_logger
 from shared.config import settings
 from shared.database.connection import DatabaseConnection
@@ -46,10 +48,23 @@ async def check_redis():
 async def on_startup():
     global redis_consumer
     logger.info("Bot starting...")
+    start.register_handlers(bot)
+    admin.register_handlers(bot)
+    payment.register_handlers(bot)
+    # insults.register_handlers(bot)
+    # common.register_handlers(bot)
+    await bot.set_my_commands(
+        [
+            BotCommand(
+                "start",
+                START_COMMAND_CAPTION,
+            )
+        ]
+    )
+
     await check_redis()
     await DatabaseConnection.create_tables()
     ChannelService.set_bot(bot)
-    logger.debug(f"ChannelService._bot is {ChannelService._bot}")
     redis_consumer = RedisStreamConsumer(
         redis_client,
         settings.redis.stream_name,
@@ -79,10 +94,6 @@ async def on_shutdown():
 async def main():
     await on_startup()
 
-    start.register_handlers(bot)
-    payment.register_handlers(bot)
-    # insults.register_handlers(bot)
-    # common.register_handlers(bot)
     while True:
         try:
             await bot.polling(timeout=20)

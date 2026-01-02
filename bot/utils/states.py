@@ -7,3 +7,8 @@ class StartStates(StatesGroup):
 
 class InsultStates(StatesGroup):
     waiting_for_gender = State()
+
+
+class Notify(StatesGroup):
+    waiting_for_media = State()
+    preview_confirmed = State()
