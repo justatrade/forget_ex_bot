@@ -143,6 +143,12 @@ async def handle_notify_confirmation(call: CallbackQuery, bot: AsyncTeleBot) -> 
         await bot.answer_callback_query(
             call.id,
             text="✅ Отправляю!",
+            show_alert=True,
+        )
+        await bot.edit_message_text(
+            "Идёт отправка...",
+            chat_id,
+            message_id,
         )
 
         if await send_notification_to_users(bot, user_id, chat_id):
