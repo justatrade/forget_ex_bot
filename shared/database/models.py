@@ -73,7 +73,7 @@ class User(BaseModel):
     payment_status: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     last_interaction: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), onupdate=datetime.now()
+        DateTime(timezone=True)
     )
     invite_link: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     came_from: Mapped[CameFrom] = mapped_column(
