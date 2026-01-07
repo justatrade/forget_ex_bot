@@ -15,14 +15,16 @@ async def get_users_who_started_but_did_not_payed() -> list[User]:
                 Payment.user_id == User.id,
                 Payment.payment_system == PaymentSystem.ROBOKASSA,
                 Payment.status == PaymentStatus.SUCCESS,
-                Payment.user_id.not_in(EXCLUDED_USER_IDS),
             )
             .exists()
         )
 
         stmt = (
             select(User)
-            .where(~successful_payment_exists)
+            .where(
+                ~successful_payment_exists,
+                User.id.not_in(EXCLUDED_USER_IDS),
+            )
         )
 
         result = await session.execute(stmt)
